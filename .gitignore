@@ -2,3 +2,17 @@
 .tmp/
 deliverables/
 
+# Investment radar runtime data and local secrets
+.etf-kline-cache.json
+.etf-valuation-cache.json
+.mx-downloads/
+.vendor/
+.venv/
+.env
+.env.*
+
+# Local launch-agent configuration and generated previews
+com.frankshu.investment-radar.plist
+*-preview.png
+investment-decision-radar-full.png
+investment-decision-radar-all-pages.png

@@ -1,0 +1,2764 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>投资决策雷达 | ETF 估值情绪系统</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-2: #f7fafc;
+      --ink: #172033;
+      --muted: #687385;
+      --line: #dfe6ef;
+      --blue: #2563eb;
+      --blue-soft: rgba(37, 99, 235, 0.12);
+      --green: #159455;
+      --green-soft: rgba(21, 148, 85, 0.12);
+      --yellow: #d39a00;
+      --yellow-soft: rgba(211, 154, 0, 0.15);
+      --red: #c2413a;
+      --red-soft: rgba(194, 65, 58, 0.12);
+      --purple: #6d5bd0;
+      --shadow: 0 10px 24px rgba(31, 45, 61, 0.08);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0) 280px),
+        radial-gradient(circle at 18% 0%, rgba(37,99,235,0.08), transparent 280px),
+        var(--bg);
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    .shell {
+      width: min(1480px, 100%);
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .site-footer {
+      padding: 22px 4px 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .site-footer p { margin: 0; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 36px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 840px;
+    }
+
+    .status {
+      min-width: 300px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .status strong { color: var(--ink); }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--muted);
+      min-height: 42px;
+      cursor: pointer;
+      font-weight: 650;
+      box-shadow: 0 2px 8px rgba(31,45,61,0.04);
+    }
+
+    .tab.active {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      background: linear-gradient(180deg, rgba(247,250,252,0.92), rgba(255,255,255,0));
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .panel-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .panel-body { padding: 14px 16px 16px; }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .toolbar-control {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar-control select {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: var(--radius);
+      min-height: 36px;
+      padding: 0 30px 0 10px;
+    }
+
+    .toolbar > select {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: var(--radius);
+      min-height: 36px;
+      padding: 0 30px 0 10px;
+    }
+
+    .date-input {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: var(--radius);
+      min-height: 36px;
+      padding: 0 10px;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: var(--radius);
+      min-height: 36px;
+      padding: 0 12px;
+      cursor: pointer;
+      font-weight: 650;
+    }
+
+    .btn.primary {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    .file-input { display: none; }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
+
+    .metric, .tile, .rule, .record-form {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      padding: 12px;
+    }
+
+    .metric .label, .tile .label {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .metric .value {
+      margin-top: 7px;
+      font-size: clamp(24px, 3vw, 34px);
+      font-weight: 760;
+      line-height: 1.05;
+    }
+
+    .metric .sub, .tile .sub {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .light {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: var(--radius);
+      padding: 7px 10px;
+      font-weight: 700;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .green { color: var(--green); }
+    .yellow { color: var(--yellow); }
+    .red { color: var(--red); }
+    .blue { color: var(--blue); }
+    .purple { color: var(--purple); }
+
+    .dot.green { background: var(--green); }
+    .dot.yellow { background: var(--yellow); }
+    .dot.red { background: var(--red); }
+    .light.green { background: var(--green-soft); border-color: rgba(21,148,85,0.32); }
+    .light.yellow { background: var(--yellow-soft); border-color: rgba(211,154,0,0.34); }
+    .light.red { background: var(--red-soft); border-color: rgba(194,65,58,0.34); }
+
+    .metric.greenish, .tile.greenish { background: var(--green-soft); border-color: rgba(21,148,85,0.32); }
+    .metric.yellowish, .tile.yellowish { background: var(--yellow-soft); border-color: rgba(211,154,0,0.34); }
+    .metric.redish, .tile.redish { background: var(--red-soft); border-color: rgba(194,65,58,0.34); }
+    .metric.blueish, .tile.blueish { background: var(--blue-soft); border-color: rgba(37,99,235,0.28); }
+
+    .valuation-board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .valuation-mode-switch {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    #opportunityModeSwitch { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .valuation-mode {
+      min-height: 68px;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      width: 100%;
+      min-width: 0;
+      white-space: normal;
+    }
+
+    .valuation-mode b { font-size: 14px; overflow-wrap: anywhere; }
+    .valuation-mode span { color: var(--muted); font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
+    .valuation-mode:hover { border-color: var(--blue); }
+    .valuation-mode.active { border-color: var(--blue); background: var(--blue-soft); box-shadow: inset 0 0 0 1px var(--blue); }
+
+    .valuation-navigation {
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .valuation-navigation p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .search-input {
+      width: min(320px, 60vw);
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 0 10px;
+    }
+
+    .name-cell { min-width: 190px; }
+    .name-cell small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+
+    .valuation-sector {
+      min-height: 162px;
+      display: grid;
+      align-content: space-between;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .valuation-sector:hover, .valuation-sector.active { border-color: var(--blue); }
+    .valuation-sector.active { box-shadow: inset 0 0 0 1px var(--blue); }
+    .valuation-sector-head, .valuation-sector-footer { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+    .valuation-sector h3 { margin: 0; font-size: 15px; line-height: 1.3; }
+    .valuation-sector-footer { color: var(--muted); font-size: 12px; }
+    .valuation-lines { display: grid; gap: 8px; }
+    .valuation-line { display: grid; grid-template-columns: 44px minmax(42px, 1fr) auto; gap: 7px; align-items: center; color: var(--muted); font-size: 11px; }
+    .valuation-line b { color: var(--ink); font-variant-numeric: tabular-nums; font-size: 11px; }
+    .valuation-track { height: 6px; overflow: hidden; border-radius: 99px; background: #e7edf5; }
+    .valuation-fill { display: block; width: var(--w, 0%); height: 100%; background: var(--blue); }
+    .valuation-fill.low { background: var(--green); }
+    .valuation-fill.mid { background: var(--yellow); }
+    .valuation-fill.high { background: var(--red); }
+    .valuation-fill.turnover { background: var(--purple); }
+    .valuation-footnote { padding-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .valuation-footnote p { margin: 0; }
+    .valuation-footnote details { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 10px; }
+    .valuation-footnote summary { cursor: pointer; color: var(--muted); }
+
+    .score-line {
+      height: 8px;
+      border-radius: 99px;
+      background: #e8eef6;
+      overflow: hidden;
+      margin-top: 9px;
+    }
+
+    .score-line span {
+      display: block;
+      height: 100%;
+      width: var(--w, 0%);
+      background: linear-gradient(90deg, var(--green), var(--yellow), var(--red));
+    }
+
+    .rebound-gates {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .rebound-gate {
+      min-height: 72px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 9px 10px;
+    }
+
+    .rebound-gate b, .rebound-gate span { display: block; }
+    .rebound-gate b { font-size: 13px; line-height: 1.3; }
+    .rebound-gate span { margin-top: 5px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .rebound-gate.pass { background: var(--green-soft); border-color: rgba(21,148,85,0.32); }
+    .rebound-gate.fail { background: var(--surface-2); }
+    .rebound-gate.pending { background: var(--yellow-soft); border-color: rgba(211,154,0,0.34); }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .flow-step {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 10px;
+      min-height: 92px;
+    }
+
+    .flow-step b { display: block; font-size: 14px; }
+    .flow-step span {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 9px 8px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 700;
+      background: var(--surface-2);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .table-wrap {
+      max-height: 520px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--muted); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 700;
+      background: #edf2f7;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .badge.low { background: var(--green-soft); color: var(--green); }
+    .badge.mid { background: var(--yellow-soft); color: #8a6500; }
+    .badge.high { background: var(--red-soft); color: var(--red); }
+    .badge.proxy { background: var(--blue-soft); color: var(--blue); }
+
+    .candidate-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .candidate {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      padding: 10px;
+    }
+
+    .candidate h3 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .candidate p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .candidate .rank {
+      min-width: 52px;
+      text-align: right;
+      font-size: 22px;
+      font-weight: 760;
+      color: var(--blue);
+    }
+
+    .rule h3, .tile h3 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .rule p, .tile p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 8px;
+    }
+
+    .check {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .check input { margin-top: 2px; }
+
+    .record-form {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+
+    .field { display: grid; gap: 5px; }
+    .field label { color: var(--muted); font-size: 12px; }
+
+    .field input, .field select, .field textarea {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      min-height: 34px;
+      padding: 7px 9px;
+      color: var(--ink);
+    }
+
+    .field textarea {
+      min-height: 72px;
+      resize: vertical;
+    }
+
+    .wide-2 { grid-column: span 2; }
+    .wide-3 { grid-column: span 3; }
+    .wide-6 { grid-column: 1 / -1; }
+
+    .empty {
+      color: var(--muted);
+      padding: 16px;
+      text-align: center;
+    }
+
+    .mini-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 1120px) {
+      .tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .valuation-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .record-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .wide-2, .wide-3 { grid-column: span 1; }
+    }
+
+    @media (max-width: 760px) {
+      .shell { padding: 12px; }
+      .topbar, .panel-head { flex-direction: column; }
+      .status { text-align: left; min-width: 0; }
+      .tabs, .grid-4, .grid-3, .grid-2, .flow, .record-form, .valuation-board, .valuation-mode-switch, .rebound-gates { grid-template-columns: 1fr; }
+      .toolbar { justify-content: flex-start; }
+      .search-input { width: 100%; }
+      th, td { white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <h1>投资决策雷达</h1>
+        <p>把 ETF 决策固定为一条链：宏观定上限，估值定价值，情绪定买点，均线和流动性定标的，纪律定仓位和退出。</p>
+      </div>
+      <div class="status">
+        数据状态：<strong id="dataStatus">等待加载 ETF 数据</strong><br>
+        更新时间：<span id="updatedAt">--</span>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="投资决策页面">
+      <button class="tab active" data-tab="overview" type="button">今日结论</button>
+      <button class="tab" data-tab="macro" type="button">宏观环境</button>
+      <button class="tab" data-tab="sentiment" type="button">市场情绪</button>
+      <button class="tab" data-tab="valuation" type="button">市场估值</button>
+      <button class="tab" data-tab="opportunity" type="button">ETF机会</button>
+      <button class="tab" data-tab="discipline" type="button">策略纪律</button>
+      <button class="tab" data-tab="review" type="button">复盘记录</button>
+    </nav>
+
+    <section class="view active" id="overview">
+      <div class="stack">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>今日结论</h2>
+              <p>首页只输出能执行的结论：能不能买、买多少、买哪些、为什么、怎么退出。</p>
+            </div>
+            <div class="toolbar">
+              <label class="toolbar-control" for="strategyProfile"><span>持有周期</span><select id="strategyProfile" aria-label="持有周期">
+                <option value="short">短期反弹（1–14天）</option>
+                <option value="medium">中期波段（2–12周）</option>
+                <option value="long">长期定投（1年以上）</option>
+                <option value="blend">长短结合（核心+战术）</option>
+              </select></label>
+              <label class="toolbar-control" for="executionSensitivity"><span>执行敏感度</span><select id="executionSensitivity" aria-label="执行敏感度">
+                <option value="conservative">保守</option>
+                <option value="neutral">中性</option>
+                <option value="aggressive">激进</option>
+              </select></label>
+              <input class="date-input" id="analysisDate" type="date" aria-label="分析日期">
+              <button class="btn" id="latestDateBtn" type="button">今日</button>
+              <button class="btn primary" id="refreshBtn" type="button">刷新数据</button>
+            </div>
+          </div>
+          <div class="panel-body stack">
+            <div class="grid-4">
+              <div class="metric" id="lightCard">
+                <div class="label">今日操作灯</div>
+                <div class="value"><span class="light"><span class="dot yellow"></span><span id="trafficLight">黄灯</span></span></div>
+                <div class="sub" id="trafficReason">等待数据计算。</div>
+              </div>
+              <div class="metric blueish">
+                <div class="label">本期建议</div>
+                <div class="value" id="dcaValue">--</div>
+                <div class="sub" id="dcaReason">等待数据计算。</div>
+              </div>
+              <div class="metric">
+                <div class="label">反弹条件（短线）</div>
+                <div class="value" id="reboundConditionValue">--</div>
+                <div class="sub" id="reboundConditionSub">不是综合分，逐项检查后再决定是否试仓。</div>
+              </div>
+              <div class="metric">
+                <div class="label">反弹候选</div>
+                <div class="value" id="candidateCount">--</div>
+                <div class="sub">超跌、流动性合格的去重指数机会；估值可筛选。</div>
+              </div>
+            </div>
+
+            <div class="rebound-gates" id="reboundGates" aria-label="反弹条件检查"></div>
+
+            <div class="grid-4">
+              <div class="tile" id="macroTile">
+                <div class="label">宏观</div>
+                <h3 id="macroState">中性</h3>
+                <p id="macroExplain">美元、利率、人民币决定仓位上限。</p>
+              </div>
+              <div class="tile" id="valuationTile">
+                <div class="label">估值</div>
+                <h3 id="valuationState">等待数据</h3>
+                <p id="valuationExplain">按 PE/PB 历史百分位判断价值。</p>
+              </div>
+              <div class="tile" id="sentimentTile">
+                <div class="label">情绪</div>
+                <h3 id="sentimentState">等待数据</h3>
+                <p id="sentimentExplain">恐慌和超跌决定是否接近买点。</p>
+              </div>
+              <div class="tile" id="trendTile">
+                <div class="label">趋势</div>
+                <h3 id="trendState">等待数据</h3>
+                <p id="trendExplain">均线偏离和修复状态决定买入节奏。</p>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <section class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2>今日操作建议</h2>
+                    <p>按条件门控执行，不以单一综合分替代判断。</p>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <div id="operationAdvice" class="rule blueish">
+                    <h3>等待数据</h3>
+                    <p>加载 ETF 数据后生成建议。</p>
+                  </div>
+                </div>
+              </section>
+              <section class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2>反弹候选 Top 10</h2>
+                    <p>对齐旧 ETF 页口径：非债券/货币/商品 ETF，按 20/60 日超跌、成交额和换手率排序；估值不参与候选准入，可在此筛选。</p>
+                  </div>
+                  <div class="toolbar">
+                    <select id="candidateValuationFilter" aria-label="反弹候选估值筛选">
+                      <option value="all">全部估值</option>
+                      <option value="low">低估</option>
+                      <option value="mid">适中</option>
+                      <option value="high">高估</option>
+                      <option value="missing">无估值</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <div class="candidate-list" id="topCandidates"></div>
+                </div>
+              </section>
+            </div>
+
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="view" id="macro">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>宏观环境</h2>
+            <p>观察外部折现压力、汇率与国内资金期限结构，只给出整体风险环境，不直接发出单笔买卖指令。</p>
+          </div>
+          <div class="toolbar">
+            <label class="toolbar-control" for="macroSensitivity">
+              <span>判断敏感性</span>
+              <select id="macroSensitivity" aria-label="宏观判断敏感性">
+                <option value="stable">稳健（低敏感）</option>
+                <option value="balanced">均衡（推荐）</option>
+                <option value="sensitive">灵敏（高敏感）</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="panel-body stack">
+          <div class="grid-4">
+            <div class="metric"><div class="label">美元指数</div><div class="value" id="macroDollarValue">--</div><div class="sub" id="macroDollarSub">来源将在加载后显示。</div></div>
+            <div class="metric"><div class="label">美国10年债</div><div class="value" id="macroTenYearValue">--</div><div class="sub" id="macroTenYearSub">来源：FRED DGS10。</div></div>
+            <div class="metric"><div class="label">10Y TIPS</div><div class="value" id="macroTipsValue">--</div><div class="sub" id="macroTipsSub">来源：FRED DFII10。</div></div>
+            <div class="metric"><div class="label">USD/CNY</div><div class="value" id="macroCnyValue">--</div><div class="sub" id="macroCnySub">来源：FRED DEXCHUS。</div></div>
+          </div>
+          <div class="grid-4">
+            <div class="metric"><div class="label">黄金/美元</div><div class="value" id="macroGoldValue">--</div><div class="sub" id="macroGoldSub">来源将在加载后显示。</div></div>
+            <div class="metric yellowish"><div class="label">SHIBOR 3M</div><div class="value" id="macroShiborValue">--</div><div class="sub" id="macroShiborSub">来源：中国货币网 / 全国银行间同业拆借中心。</div></div>
+            <div class="metric yellowish"><div class="label">SHIBOR 5日变化</div><div class="value" id="macroShibor5dValue">--</div><div class="sub" id="macroShibor5dSub">3M 相对 5 个交易日前，单位 bp。</div></div>
+            <div class="metric yellowish"><div class="label">SHIBOR 20日变化</div><div class="value" id="macroShibor20dValue">--</div><div class="sub" id="macroShibor20dSub">3M 相对 20 个交易日前，单位 bp。</div></div>
+          </div>
+          <div class="grid-3">
+            <div class="tile blueish"><h3 id="macroConclusionTitle">宏观状态：等待数据</h3><p id="macroConclusionText">正在从公开来源加载海外折现压力与国内资金面数据。</p></div>
+            <div class="tile"><h3>改善组合</h3><p>实际利率回落、美元压力缓和、USD/CNY 稳定，同时 SHIBOR 3M 的 5/20 日变化趋于下行。此时风险环境改善，但仍需市场情绪页确认。</p></div>
+            <div class="tile redish"><h3>收紧组合</h3><p>实际利率偏高或继续上行，叠加汇率压力和 SHIBOR 3M 持续上行。短线超跌只能观察，避免把资金收紧误判为买点。</p></div>
+          </div>
+          <div class="rule">
+            <h3>数据来源与使用口径</h3>
+            <p id="macroSensitivityNote">均衡档：外部实际利率和国内资金面需要共同确认，才判定为“收紧”。</p>
+            <p><a href="https://www.chinamoney.com.cn/chinese/bkshibor/" target="_blank" rel="noreferrer">SHIBOR 当前报价：全国银行间同业拆借中心 / 中国货币网</a>（交易日 11:00 发布）；<a href="https://www.chinamoney.com.cn/chinese/bkshiborhischart/index.html?term=3M-3M" target="_blank" rel="noreferrer">SHIBOR 3M 历史图表</a>（5/20 日变化按最近 5/20 个交易日计算）；<a href="https://fred.stlouisfed.org/series/DGS10" target="_blank" rel="noreferrer">美国10年债：FRED DGS10</a>；<a href="https://fred.stlouisfed.org/series/DFII10" target="_blank" rel="noreferrer">10Y TIPS：FRED DFII10</a>；美元指数优先东方财富、失败时使用 FRED 替代；黄金/美元优先东方财富、失败时使用 Gold API 现货报价。全部宏观数值均由本地服务向来源请求；单项失败时显示失败原因，不展示样例或本地静态数据。</p>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="view" id="valuation">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>市场估值</h2>
+            <p>用板块温度图先判断估值、均线与资金状态，再在 ETF 明细中选具体标的。</p>
+          </div>
+          <div class="toolbar">
+            <input class="search-input" id="valuationSearch" type="search" placeholder="搜索代码 / 名称 / 跟踪指数" aria-label="搜索 ETF 代码、名称或跟踪指数">
+            <select id="valuationLevelFilter" aria-label="市场估值水平筛选">
+              <option value="all">全部估值</option><option value="low">低估</option><option value="mid">适中</option><option value="high">高估</option><option value="missing">未覆盖</option>
+            </select>
+          </div>
+        </div>
+        <div class="panel-body stack">
+          <div class="grid-4" aria-label="整体估值状态">
+            <div class="metric"><div class="label">估值覆盖</div><div class="value" id="valuationCoverage">--</div><div class="sub" id="valuationCoverageSub">直接估值和代理估值合计。</div></div>
+            <div class="metric greenish"><div class="label">低估 ETF</div><div class="value" id="lowValuationCount">--</div><div class="sub">历史百分位低于 30%。</div></div>
+            <div class="metric yellowish"><div class="label">适中 ETF</div><div class="value" id="midValuationCount">--</div><div class="sub">历史百分位 30%-70%。</div></div>
+            <div class="metric redish"><div class="label">高估 ETF</div><div class="value" id="highValuationCount">--</div><div class="sub">历史百分位高于 70%。</div></div>
+          </div>
+          <div class="valuation-mode-switch" id="valuationModeSwitch" aria-label="市场估值视图">
+            <button class="valuation-mode active" type="button" data-valuation-mode="industry"><b>行业温度</b><span>先选一级行业，再下钻细分行业</span></button>
+            <button class="valuation-mode" type="button" data-valuation-mode="style"><b>宽基与风格</b><span>宽基、规模、成长价值与红利风格</span></button>
+            <button class="valuation-mode" type="button" data-valuation-mode="theme"><b>主题热度</b><span>科技、新能源、制造等跨行业主题</span></button>
+          </div>
+          <div class="valuation-navigation">
+            <p id="valuationGuide">选择一张行业卡片查看细分行业；再次点击当前模式返回上一级。</p>
+            <button class="btn" id="valuationBackBtn" type="button" hidden aria-label="返回上一级">← 返回上一级</button>
+          </div>
+          <h3 id="valuationBoardTitle">中证一级行业温度图</h3>
+          <div class="valuation-board" id="valuationSectorBoard"></div>
+          <div>
+            <h3>ETF 明细 <span class="badge" id="valuationResultCount">--</span></h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>板块</th><th>代码</th><th>名称 / 跟踪指数</th><th class="num">涨跌幅</th><th class="num">估值</th><th>历史位置</th><th class="num">20 日</th><th class="num">60 日</th><th class="num">换手率</th><th class="num">成交额</th></tr></thead>
+                <tbody id="valuationEtfRows"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="valuation-footnote">
+            <p>消费、医药、科技优先 PE；银行、券商、周期、红利优先 PB；带 * 表示代理指数。</p>
+            <details>
+              <summary>估值源覆盖缺口与处理口径</summary>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>原因</th><th class="num">数量</th><th>处理方式</th></tr></thead>
+                  <tbody id="missingReasonRows"></tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="view" id="sentiment">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>市场情绪</h2>
+            <p>热度只描述市场状态；资金方向和交易活跃度单列，不把“市场强”误读成“适合买入”。</p>
+          </div>
+        </div>
+        <div class="panel-body stack">
+          <div class="grid-4">
+            <div class="metric" id="sentimentTemperatureCard"><div class="label">市场热度</div><div class="value" id="sentimentTemperatureValue">--</div><div class="sub" id="sentimentTemperatureSub">只衡量市场冷暖，不直接给买卖建议。</div></div>
+            <div class="metric" id="attackCard"><div class="label">热度趋势（3日）</div><div class="value" id="attackValue">--</div><div class="sub" id="attackSub">低位回升与高位降温的含义不同。</div></div>
+            <div class="metric" id="breadthCard"><div class="label">上涨占比</div><div class="value" id="breadthValue">--</div><div class="sub" id="breadthSub">按跟踪指数族去重，每个指数一票。</div></div>
+            <div class="metric" id="drawdownCard"><div class="label">超跌强度</div><div class="value" id="drawdownValue">--</div><div class="sub">20/60 日均线综合偏离中位数。</div></div>
+          </div>
+          <div class="grid-4">
+            <div class="metric" id="amountDirectionCard"><div class="label">资金方向</div><div class="value" id="amountDirectionValue">--</div><div class="sub" id="amountDirectionSub">同指数 ETF 成交额合并后，判断偏向上涨或下跌。</div></div>
+            <div class="metric" id="sectorBreadthCard"><div class="label">板块扩散</div><div class="value" id="sectorBreadthValue">--</div><div class="sub" id="sectorBreadthSub">上涨一级行业占比。</div></div>
+            <div class="metric" id="maRecoveryCard"><div class="label">均线修复</div><div class="value" id="maRecoveryValue">--</div><div class="sub" id="maRecoverySub">站上 20 日均线的去重指数族占比。</div></div>
+            <div class="metric" id="liquidityCard"><div class="label">交易活跃度</div><div class="value" id="liquidityValue">--</div><div class="sub" id="liquiditySub">以日成交量在自身历史中的位置衡量，不等同于资金进攻。</div></div>
+          </div>
+          <div class="grid-3">
+            <div class="tile blueish"><h3 id="sentimentConclusionTitle">情绪状态：等待数据</h3><p id="sentimentConclusionText">等待 ETF 行情和均线数据载入。</p></div>
+            <div class="tile yellowish"><h3>接近条件</h3><p>估值不过热、均线负偏离扩大后止跌，成交额仍可执行，且短期资金压力不再恶化。只允许试探，不用单指标抄底。</p></div>
+            <div class="tile redish"><h3>阻断条件</h3><p>情绪过热、成交缩量、均线未止跌，或宏观状态转为收紧。短线机会失效时不摊平、不追高。</p></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="view" id="opportunity">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>板块与 ETF 机会</h2>
+            <p>与“反弹候选 Top 10”共用同一去重机会池与准入规则；可按行业、宽基与风格、主题切片查看。</p>
+          </div>
+          <div class="toolbar">
+            <select id="opportunityGroupFilter" aria-label="ETF 机会分类筛选"><option value="all">全部分类</option></select>
+            <select id="valuationFilter" aria-label="估值筛选">
+              <option value="all">全部估值</option>
+              <option value="low">低估</option>
+              <option value="mid">适中</option>
+              <option value="high">高估</option>
+              <option value="missing">无估值</option>
+            </select>
+          </div>
+        </div>
+        <div class="panel-body stack">
+          <div class="valuation-mode-switch" id="opportunityModeSwitch" aria-label="ETF 机会分类视图">
+            <button class="valuation-mode active" type="button" data-opportunity-mode="all"><b>综合</b><span>同时显示三维分类</span></button>
+            <button class="valuation-mode" type="button" data-opportunity-mode="industry"><b>行业</b><span>中证一级行业与细分行业</span></button>
+            <button class="valuation-mode" type="button" data-opportunity-mode="style"><b>宽基与风格</b><span>宽基、规模、成长价值与红利</span></button>
+            <button class="valuation-mode" type="button" data-opportunity-mode="theme"><b>主题</b><span>科技、新能源、制造等跨行业主题</span></button>
+          </div>
+          <div class="valuation-navigation">
+            <p id="opportunityGuide">与反弹候选 Top 10 共用同一机会池。</p>
+            <span class="badge" id="opportunityResultCount">--</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>分类</th>
+                  <th>代码</th>
+                  <th>名称</th>
+                  <th class="num">涨跌幅</th>
+                  <th class="num">估值</th>
+                  <th>历史位置</th>
+                  <th class="num">20日</th>
+                  <th class="num">60日</th>
+                  <th class="num">成交额</th>
+                  <th class="num">换手</th>
+                  <th class="num">候选分</th>
+                </tr>
+              </thead>
+              <tbody id="etfRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="view" id="discipline">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>策略与纪律</h2>
+            <p>持有周期和执行敏感度与“今日结论”双向同步。长期与短线使用不同仓位口径；长短结合始终分为核心仓和战术仓。</p>
+          </div>
+          <div class="toolbar">
+            <label class="toolbar-control" for="disciplineStrategyProfile"><span>持有周期</span><select id="disciplineStrategyProfile" aria-label="策略纪律持有周期">
+              <option value="short">短期反弹（1–14天）</option>
+              <option value="medium">中期波段（2–12周）</option>
+              <option value="long">长期定投（1年以上）</option>
+              <option value="blend">长短结合（核心+战术）</option>
+            </select></label>
+            <label class="toolbar-control" for="disciplineExecutionSensitivity"><span>执行敏感度</span><select id="disciplineExecutionSensitivity" aria-label="策略纪律执行敏感度">
+              <option value="conservative">保守</option>
+              <option value="neutral">中性</option>
+              <option value="aggressive">激进</option>
+            </select></label>
+          </div>
+        </div>
+        <div class="panel-body stack">
+          <div class="grid-4">
+            <div class="metric"><div class="label">0.25x</div><div class="value">防守</div><div class="sub">长期定投在整体高估时保留微量；短期与中期则等待。</div></div>
+            <div class="metric"><div class="label">0.5x</div><div class="value">试仓 / 减量</div><div class="sub">长期宏观逆风减量；中短期只作为确认前的观察仓。</div></div>
+            <div class="metric blueish"><div class="label">1x</div><div class="value">基准</div><div class="sub">长期估值适中时常规投入；中期趋势确认后按基准建仓。</div></div>
+            <div class="metric greenish"><div class="label">1.5x / 2x</div><div class="value">加仓</div><div class="sub">长期低估可升至 1.5x；低估且至少两项技术改善才升至 2x。</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="rule">
+              <h3>四种持有周期</h3>
+              <p>短期反弹：1-14 天，只在反弹条件通过后开仓。中期波段：2-12 周，要求趋势与资金确认。长期定投：一年以上，按估值和宏观调节 0.25x–2x。长短结合：核心仓按长期定投，战术仓按短期反弹，必须分账记录。</p>
+            </div>
+            <div class="rule">
+              <h3>短线反弹规则</h3>
+              <p>持有周期 1-14 天；必须分批；成交额不足不买；估值不高才参与，适中估值仅按敏感度试仓；宏观收紧或估值待接入时不新开仓；14 天无反弹退出；反弹失败不转成长线。短线 0x 是等待信号，不是长期账户清仓。保守档提高确认门槛；激进档可提前试仓，但不能绕过宏观收紧或高估阻断。</p>
+            </div>
+          </div>
+          <div class="flow" aria-label="策略决策顺序">
+            <div class="flow-step"><b>宏观定上限</b><span>逆风时降低仓位，即使局部超跌也只做小仓。</span></div>
+            <div class="flow-step"><b>估值定价值</b><span>低估提高长期投入；适中按所选周期执行；高估不追涨。</span></div>
+            <div class="flow-step"><b>情绪定买点</b><span>恐慌、超卖、急跌接近触发才考虑提高倍数。</span></div>
+            <div class="flow-step"><b>均线定标的</b><span>用 20/60 日偏离筛超跌和修复，不单看涨跌幅。</span></div>
+            <div class="flow-step"><b>纪律定退出</b><span>分批、止损、最长 14 天，不把失败交易改成长线。</span></div>
+          </div>
+          <div class="rule">
+            <h3>交易前检查</h3>
+            <div class="checklist">
+              <label class="check"><input type="checkbox"> 已确认本次是短期反弹、中期波段、长期定投或长短结合。</label>
+              <label class="check"><input type="checkbox"> 当前操作符合该风格的仓位档位。</label>
+              <label class="check"><input type="checkbox"> 估值低或适中偏低，不是高估追涨。</label>
+              <label class="check"><input type="checkbox"> 短线交易已写好退出条件和最长持有时间。</label>
+              <label class="check"><input type="checkbox"> 不是因为亏损后想摊平而买入。</label>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="view" id="review">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>复盘记录</h2>
+            <p>记录保存在当前浏览器本地；可导出备份或导入恢复。长短结合请把核心仓与战术仓分两条记录。</p>
+          </div>
+          <div class="toolbar">
+            <button class="btn" id="exportReviewMd" type="button">导出 MD</button>
+            <button class="btn" id="exportReviewCsv" type="button">导出 CSV</button>
+            <button class="btn" id="exportReviewJson" type="button">备份 JSON</button>
+            <button class="btn" id="importReviewJson" type="button">导入 JSON</button>
+            <input class="file-input" id="importReviewFile" type="file" accept="application/json,.json">
+          </div>
+        </div>
+        <div class="panel-body stack">
+          <form class="record-form" id="recordForm">
+            <div class="field"><label>日期</label><input id="recordDate" type="date"></div>
+            <div class="field"><label>ETF</label><input id="recordEtf" placeholder="例如 510300"></div>
+            <div class="field"><label>操作</label><select id="recordAction"><option>买入</option><option>卖出</option><option>观察</option></select></div>
+            <div class="field"><label>仓位倍数</label><select id="recordDca"><option>0.25x</option><option>0.5x</option><option selected>1x</option><option>1.5x</option><option>2x</option></select></div>
+            <div class="field"><label>持有天数</label><input id="recordDays" type="number" min="0" placeholder="0"></div>
+            <div class="field"><label>收益率</label><input id="recordReturn" placeholder="例如 3.2%"></div>
+            <div class="field wide-3"><label>买入/卖出理由</label><textarea id="recordReason" placeholder="估值、情绪、均线、成交额、退出条件"></textarea></div>
+            <div class="field wide-3"><label>执行复盘</label><textarea id="recordReview" placeholder="是否遵守纪律，哪里需要修正"></textarea></div>
+            <button class="btn primary wide-6" type="submit">保存复盘记录</button>
+          </form>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>日期</th><th>ETF</th><th>操作</th><th>仓位</th><th>收益率</th><th>理由</th><th>复盘</th></tr></thead>
+              <tbody id="reviewRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+    <footer class="site-footer">
+      <p>版权所有 © 舒坦 Frank Shu | Copyright © Frank Shu. All rights reserved.</p>
+      <p>本页面仅供参考，不构成投资建议。For informational purposes only; not investment advice.</p>
+    </footer>
+  </main>
+
+  <script>
+    const QUOTE_API = "/api/etfs";
+    const KLINES_API = "/api/klines";
+    const MACRO_API = "/api/macro";
+    const VALUATION_API = "/api/valuations";
+    const KLINE_BATCH_SIZE = 80;
+    const KLINE_DELAY_MS = 350;
+    const REVIEW_KEY = "investmentDecisionRadar.reviewRecords";
+    const MACRO_SENSITIVITY_KEY = "investmentDecisionRadar.macroSensitivity";
+    const STRATEGY_PROFILE_KEY = "investmentDecisionRadar.strategyProfile";
+    const EXECUTION_SENSITIVITY_KEY = "investmentDecisionRadar.executionSensitivity";
+
+    function savedMacroSensitivity() {
+      try {
+        const value = localStorage.getItem(MACRO_SENSITIVITY_KEY);
+        return ["stable", "balanced", "sensitive"].includes(value) ? value : "balanced";
+      } catch (_) {
+        return "balanced";
+      }
+    }
+
+    function savedStrategyProfile() {
+      try {
+        const value = localStorage.getItem(STRATEGY_PROFILE_KEY);
+        const legacy = { dca: "short", value: "medium", rebound: "short" };
+        return legacy[value] || (["short", "medium", "long", "blend"].includes(value) ? value : "short");
+      } catch (_) {
+        return "short";
+      }
+    }
+
+    function savedExecutionSensitivity() {
+      try {
+        const value = localStorage.getItem(EXECUTION_SENSITIVITY_KEY);
+        return ["conservative", "neutral", "aggressive"].includes(value) ? value : "neutral";
+      } catch (_) {
+        return "neutral";
+      }
+    }
+
+    function todayIso() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    const state = {
+      rows: [],
+      summary: null,
+      macro: null,
+      liveValuations: new Map(),
+      valuationHistoryLoading: false,
+      macroRun: 0,
+      opportunityViewMode: "all",
+      opportunityGroup: "all",
+      valuation: "all",
+      valuationViewMode: "industry",
+      valuationSector: "all",
+      valuationDetail: "all",
+      valuationBoardLevel: "all",
+      valuationSearch: "",
+      candidateValuation: "all",
+      macroSensitivity: savedMacroSensitivity(),
+      strategyProfile: savedStrategyProfile(),
+      executionSensitivity: savedExecutionSensitivity(),
+      analysisDate: todayIso(),
+      klineEffectiveDate: "",
+      loadingKlines: false,
+      klineRun: 0,
+      analysisRun: 0
+    };
+
+    const els = {
+      dataStatus: document.getElementById("dataStatus"),
+      updatedAt: document.getElementById("updatedAt"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      strategyProfile: document.getElementById("strategyProfile"),
+      executionSensitivity: document.getElementById("executionSensitivity"),
+      disciplineStrategyProfile: document.getElementById("disciplineStrategyProfile"),
+      disciplineExecutionSensitivity: document.getElementById("disciplineExecutionSensitivity"),
+      macroSensitivity: document.getElementById("macroSensitivity"),
+      macroSensitivityNote: document.getElementById("macroSensitivityNote"),
+      trafficLight: document.getElementById("trafficLight"),
+      trafficReason: document.getElementById("trafficReason"),
+      lightCard: document.getElementById("lightCard"),
+      dcaValue: document.getElementById("dcaValue"),
+      dcaReason: document.getElementById("dcaReason"),
+      reboundConditionValue: document.getElementById("reboundConditionValue"),
+      reboundConditionSub: document.getElementById("reboundConditionSub"),
+      reboundGates: document.getElementById("reboundGates"),
+      candidateCount: document.getElementById("candidateCount"),
+      analysisDate: document.getElementById("analysisDate"),
+      latestDateBtn: document.getElementById("latestDateBtn"),
+      macroState: document.getElementById("macroState"),
+      macroExplain: document.getElementById("macroExplain"),
+      macroTile: document.getElementById("macroTile"),
+      valuationState: document.getElementById("valuationState"),
+      valuationExplain: document.getElementById("valuationExplain"),
+      valuationTile: document.getElementById("valuationTile"),
+      sentimentState: document.getElementById("sentimentState"),
+      sentimentExplain: document.getElementById("sentimentExplain"),
+      sentimentTile: document.getElementById("sentimentTile"),
+      trendState: document.getElementById("trendState"),
+      trendExplain: document.getElementById("trendExplain"),
+      trendTile: document.getElementById("trendTile"),
+      operationAdvice: document.getElementById("operationAdvice"),
+      topCandidates: document.getElementById("topCandidates"),
+      candidateValuationFilter: document.getElementById("candidateValuationFilter"),
+      valuationCoverage: document.getElementById("valuationCoverage"),
+      valuationCoverageSub: document.getElementById("valuationCoverageSub"),
+      lowValuationCount: document.getElementById("lowValuationCount"),
+      midValuationCount: document.getElementById("midValuationCount"),
+      highValuationCount: document.getElementById("highValuationCount"),
+      valuationModeSwitch: document.getElementById("valuationModeSwitch"),
+      valuationSearch: document.getElementById("valuationSearch"),
+      valuationGuide: document.getElementById("valuationGuide"),
+      valuationBackBtn: document.getElementById("valuationBackBtn"),
+      valuationLevelFilter: document.getElementById("valuationLevelFilter"),
+      valuationBoardTitle: document.getElementById("valuationBoardTitle"),
+      valuationSectorBoard: document.getElementById("valuationSectorBoard"),
+      valuationEtfRows: document.getElementById("valuationEtfRows"),
+      valuationResultCount: document.getElementById("valuationResultCount"),
+      missingReasonRows: document.getElementById("missingReasonRows"),
+      breadthCard: document.getElementById("breadthCard"),
+      breadthValue: document.getElementById("breadthValue"),
+      breadthSub: document.getElementById("breadthSub"),
+      sentimentTemperatureCard: document.getElementById("sentimentTemperatureCard"),
+      sentimentTemperatureValue: document.getElementById("sentimentTemperatureValue"),
+      sentimentTemperatureSub: document.getElementById("sentimentTemperatureSub"),
+      attackCard: document.getElementById("attackCard"),
+      attackValue: document.getElementById("attackValue"),
+      attackSub: document.getElementById("attackSub"),
+      drawdownCard: document.getElementById("drawdownCard"),
+      drawdownValue: document.getElementById("drawdownValue"),
+      amountDirectionCard: document.getElementById("amountDirectionCard"),
+      amountDirectionValue: document.getElementById("amountDirectionValue"),
+      amountDirectionSub: document.getElementById("amountDirectionSub"),
+      sectorBreadthCard: document.getElementById("sectorBreadthCard"),
+      sectorBreadthValue: document.getElementById("sectorBreadthValue"),
+      sectorBreadthSub: document.getElementById("sectorBreadthSub"),
+      maRecoveryCard: document.getElementById("maRecoveryCard"),
+      maRecoveryValue: document.getElementById("maRecoveryValue"),
+      maRecoverySub: document.getElementById("maRecoverySub"),
+      liquidityCard: document.getElementById("liquidityCard"),
+      liquidityValue: document.getElementById("liquidityValue"),
+      liquiditySub: document.getElementById("liquiditySub"),
+      sentimentConclusionTitle: document.getElementById("sentimentConclusionTitle"),
+      sentimentConclusionText: document.getElementById("sentimentConclusionText"),
+      opportunityModeSwitch: document.getElementById("opportunityModeSwitch"),
+      opportunityGroupFilter: document.getElementById("opportunityGroupFilter"),
+      opportunityGuide: document.getElementById("opportunityGuide"),
+      opportunityResultCount: document.getElementById("opportunityResultCount"),
+      valuationFilter: document.getElementById("valuationFilter"),
+      etfRows: document.getElementById("etfRows"),
+      recordForm: document.getElementById("recordForm"),
+      reviewRows: document.getElementById("reviewRows"),
+      exportReviewMd: document.getElementById("exportReviewMd"),
+      exportReviewCsv: document.getElementById("exportReviewCsv"),
+      exportReviewJson: document.getElementById("exportReviewJson"),
+      importReviewJson: document.getElementById("importReviewJson"),
+      importReviewFile: document.getElementById("importReviewFile")
+    };
+
+    function num(value, fallback = null) {
+      if (value === "-" || value === "" || value === null || value === undefined) return fallback;
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function median(values) {
+      const sorted = values.map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+      if (!sorted.length) return null;
+      const mid = Math.floor(sorted.length / 2);
+      return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+
+    function pct(value, digits = 1) {
+      return value === null || value === undefined ? "--" : `${Number(value).toFixed(digits)}%`;
+    }
+
+    function amount(value) {
+      return `${num(value, 0).toFixed(1)} 亿`;
+    }
+
+    function exchangeName(market) {
+      return Number(market) === 0 ? "SZ" : "SH";
+    }
+
+    function secid(row) {
+      const market = row.market === 0 || row.exchange === "SZ" ? 0 : 1;
+      return `${market}.${row.code}`;
+    }
+
+    const CSI_PRIMARY_INDUSTRIES = ["能源", "原材料", "工业", "可选消费", "主要消费", "医药卫生", "金融", "信息技术", "通信服务", "公用事业", "房地产"];
+
+    function classifyTaxonomy(name) {
+      const text = String(name || "");
+      const taxonomy = { market: "A股", industryPrimary: "", industrySecondary: "", style: "", theme: "" };
+      if (/货币|现金|债|国开债|地方债|短融/.test(text)) return { ...taxonomy, market: "债券货币", style: "固收" };
+      if (/黄金|上海金|商品|豆粕|能源化工|期货/.test(text)) return { ...taxonomy, market: "商品", style: "商品" };
+      if (/港股|恒生|中概/.test(text)) taxonomy.market = "港股";
+      if (/纳斯达克|标普|日经|德国|法国|韩国|沙特|东南亚|美国/.test(text)) taxonomy.market = "海外";
+
+      if (/红利|股息|现金流/.test(text)) taxonomy.style = /低波/.test(text) ? "红利低波" : "红利";
+      else if (/低波|最小波动/.test(text)) taxonomy.style = "低波";
+      else if (/价值/.test(text)) taxonomy.style = "价值";
+      else if (/成长/.test(text)) taxonomy.style = "成长";
+      else if (/央企|国企/.test(text)) taxonomy.style = "央国企";
+      else if (/ESG|可持续|责任/.test(text)) taxonomy.style = "ESG";
+      else if (/沪深300|上证50|中证500|中证1000|中证800|A500|A50|深证100|创业板|科创50|科创100|科创200/.test(text)) taxonomy.style = "宽基";
+
+      if (/半导体|芯片|集成电路/.test(text)) taxonomy.theme = "半导体";
+      else if (/人工智能|AI|算力|云计算|大数据|信创|软件/.test(text)) taxonomy.theme = "AI与软件";
+      else if (/通信|5G|6G|CPO|光通信|运营商/.test(text)) taxonomy.theme = "通信";
+      else if (/机器人|工业母机|机床|高端装备|智能制造/.test(text)) taxonomy.theme = "智能制造";
+      else if (/新能源车|汽车|电池|锂电/.test(text)) taxonomy.theme = "新能源车";
+      else if (/光伏|储能|绿电|电网/.test(text)) taxonomy.theme = "电力新能源";
+      else if (/军工|国防|航空航天|航天|卫星|船舶/.test(text)) taxonomy.theme = "国防军工";
+      else if (/创新药|医疗器械|医疗服务|生物医药/.test(text)) taxonomy.theme = "医药创新";
+      else if (/红利|股息|低波/.test(text)) taxonomy.theme = "高股息";
+
+      if (taxonomy.market !== "A股") return taxonomy;
+      if (/银行/.test(text)) return { ...taxonomy, industryPrimary: "金融", industrySecondary: "银行" };
+      if (/证券|券商/.test(text)) return { ...taxonomy, industryPrimary: "金融", industrySecondary: "证券" };
+      if (/保险/.test(text)) return { ...taxonomy, industryPrimary: "金融", industrySecondary: "保险" };
+      if (/房地产|地产|REIT/.test(text)) return { ...taxonomy, industryPrimary: "房地产", industrySecondary: "房地产" };
+      if (/医药|医疗|创新药|生物医药|中药|疫苗/.test(text)) return { ...taxonomy, industryPrimary: "医药卫生", industrySecondary: /医疗器械/.test(text) ? "医疗器械" : /医疗服务/.test(text) ? "医疗服务" : /中药/.test(text) ? "中药" : "医药生物" };
+      if (/白酒|食品|饮料|乳业|农业|养殖|农牧|粮食|家电/.test(text)) return { ...taxonomy, industryPrimary: "主要消费", industrySecondary: /白酒|食品|饮料|乳业/.test(text) ? "食品饮料" : /家电/.test(text) ? "家用电器" : "农业养殖" };
+      if (/汽车|旅游|零售|传媒消费|酒店/.test(text)) return { ...taxonomy, industryPrimary: "可选消费", industrySecondary: /汽车/.test(text) ? "汽车" : /旅游|酒店/.test(text) ? "旅游休闲" : "可选消费" };
+      if (/半导体|芯片|电子|软件|云计算|人工智能|AI|信创|计算机|信息安全|消费电子/.test(text)) return { ...taxonomy, industryPrimary: "信息技术", industrySecondary: /半导体|芯片/.test(text) ? "半导体" : /电子|消费电子/.test(text) ? "电子" : "软件与计算机" };
+      if (/通信|5G|6G|CPO|光通信|电信|运营商|传媒|游戏|互联网/.test(text)) return { ...taxonomy, industryPrimary: "通信服务", industrySecondary: /传媒|游戏|互联网/.test(text) ? "传媒互联网" : "通信服务" };
+      if (/煤炭|石油|油气|能源ETF/.test(text)) return { ...taxonomy, industryPrimary: "能源", industrySecondary: /煤炭/.test(text) ? "煤炭" : "石油天然气" };
+      if (/有色|稀土|化工|钢铁|建材|材料/.test(text)) return { ...taxonomy, industryPrimary: "原材料", industrySecondary: /有色|稀土/.test(text) ? "有色金属" : /化工/.test(text) ? "化工" : /钢铁/.test(text) ? "钢铁" : "建材材料" };
+      if (/电力|绿电|环保|水务|公用事业/.test(text)) return { ...taxonomy, industryPrimary: "公用事业", industrySecondary: /环保/.test(text) ? "环保" : "电力公用" };
+      if (/军工|国防|航空航天|航天|卫星|船舶/.test(text)) return { ...taxonomy, industryPrimary: "工业", industrySecondary: "国防军工" };
+      if (/机器人|机械|工业母机|机床|制造|基建|交运|物流|电池|光伏|储能|电网|新能源/.test(text)) return { ...taxonomy, industryPrimary: "工业", industrySecondary: /机器人|工业母机|机床|机械/.test(text) ? "机械装备" : /电池|光伏|储能|电网|新能源/.test(text) ? "电气设备" : "工业运输" };
+      return taxonomy;
+    }
+
+    function taxonomyGroup(row, mode) {
+      if (mode === "industry") return row.industryPrimary || "";
+      if (mode === "style") return row.style || "";
+      if (mode === "theme") return row.theme || "";
+      return "";
+    }
+
+    function taxonomyDetail(row, mode) {
+      return mode === "industry" ? row.industrySecondary || "" : taxonomyGroup(row, mode);
+    }
+
+    function taxonomyDisplay(row, mode) {
+      if (mode !== "industry") return taxonomyGroup(row, mode) || "--";
+      return [...new Set([row.industryPrimary, row.industrySecondary].filter(Boolean))].join(" / ") || "--";
+    }
+
+    function normalize(item) {
+      const price = num(item.f2);
+      const valuationPct = num(item.valuationPct);
+      const ma20 = num(item.ma20);
+      const ma60 = num(item.ma60);
+      const taxonomy = classifyTaxonomy(item.f14);
+      const row = {
+        code: String(item.f12 || ""),
+        market: Number(item.f13),
+        exchange: exchangeName(item.f13),
+        name: String(item.f14 || ""),
+        ...taxonomy,
+        sector: taxonomy.industryPrimary || taxonomy.style || taxonomy.market,
+        price,
+        livePrice: price,
+        changePct: num(item.f3, 0),
+        liveChangePct: num(item.f3, 0),
+        turnover: num(item.f8, 0),
+        liveTurnover: num(item.f8, 0),
+        amount: num(item.f6, 0) / 100000000,
+        liveAmount: num(item.f6, 0) / 100000000,
+        pe: num(item.pe),
+        pb: item.f23 === "-" ? null : num(item.f23),
+        valuationMetric: String(item.valuationMetric || ""),
+        valuationValue: num(item.valuationValue),
+        valuationLevel: String(item.valuationLevel || ""),
+        valuationPct,
+        valuationBelowTime: num(item.valuationBelowTime),
+        valuationSource: String(item.valuationSource || ""),
+        valuationProxy: Boolean(item.valuationProxy),
+        valuationMissingReason: String(item.valuationMissingReason || ""),
+        indexName: String(item.indexName || ""),
+        indexId: String(item.indexId || ""),
+        ma20,
+        ma60,
+        score: 0,
+        candidateScore: -1
+      };
+      row.score = scoreEtf(row);
+      row.candidateScore = candidateScore(row);
+      return row;
+    }
+
+    function valuationClass(row) {
+      if (row.valuationPct === null) return "missing";
+      if (row.valuationPct <= 30) return "low";
+      if (row.valuationPct <= 70) return "mid";
+      return "high";
+    }
+
+    function valuationLabel(row) {
+      const cls = valuationClass(row);
+      if (cls === "low") return "低估";
+      if (cls === "mid") return "适中";
+      if (cls === "high") return "高估";
+      return row.valuationMissingReason || "无估值";
+    }
+
+    function formatValuation(row) {
+      if (!row.valuationMetric || row.valuationValue === null) return "--";
+      return `${row.valuationMetric}${row.valuationProxy ? "*" : ""} ${row.valuationValue.toFixed(2)}`;
+    }
+
+    function formatPosition(row) {
+      if (row.valuationPct === null) return row.valuationMissingReason || "无历史位置";
+      return `${valuationLabel(row)}${row.valuationProxy ? "*" : ""} / ${Math.round(row.valuationPct)}%`;
+    }
+
+    function scoreEtf(row) {
+      const v = row.valuationPct === null ? 8 : clamp(80 - row.valuationPct, 0, 80);
+      const ma = row.ma20 === null || row.ma60 === null ? 8 : clamp((-row.ma20 * 2.3) + (-row.ma60 * 1.1), 0, 45);
+      const liq = clamp(Math.log10(Math.max(row.amount, 0.01) + 1) * 14, 0, 24);
+      const today = row.changePct < 0 ? clamp(-row.changePct * 1.2, 0, 10) : clamp(row.changePct * 0.5, 0, 4);
+      return Math.round(clamp(v + ma + liq + today, 0, 100));
+    }
+
+    function isMarketRow(row) {
+      return !/货币|债券|商品/.test(row.sector);
+    }
+
+    function candidateGroupName(row) {
+      const name = String(row.name || "")
+        .replace(/ETF(联接)?(基金)?/g, "")
+        .replace(/交易型开放式指数证券投资基金/g, "")
+        .replace(/华夏|易方达|华泰柏瑞|南方|嘉实|博时|广发|富国|鹏华|招商|银华|国泰|汇添富|工银|建信|天弘|万家|景顺长城|平安|摩根|海富通|国联安|大成|华安|兴业|申万菱信|农银|中欧|国投瑞银|浦银安盛|永赢|东财|华宝|国联|长城|长信|泰康|华富|国寿安保|摩根/g, "")
+        .replace(/[（）()·\s]/g, "")
+        .trim();
+      return name || row.indexName || row.name || row.code;
+    }
+
+    function trackingAggregationKey(row) {
+      const family = candidateGroupName(row)
+        .replace(/发起式|增强型|增强|策略|指数|基金/g, "")
+        .replace(/[A-Z]类|[A-Z]$/i, "")
+        .trim();
+      const market = row.marketType || row.market || "未知市场";
+      const sector = row.industryPrimary || row.sector || "未分类";
+      return `${market}:${sector}:${family || row.indexName || row.name || row.code}`;
+    }
+
+    function weightedGroupValue(rows, field) {
+      const valid = rows.filter((row) => Number.isFinite(row[field]));
+      if (!valid.length) return null;
+      const totalWeight = valid.reduce((sum, row) => sum + Math.max(Number(row.amount) || 0, 0), 0);
+      if (!totalWeight) return valid.reduce((sum, row) => sum + row[field], 0) / valid.length;
+      return valid.reduce((sum, row) => sum + row[field] * Math.max(Number(row.amount) || 0, 0), 0) / totalWeight;
+    }
+
+    function aggregateTrackingIndexes(rows) {
+      const groups = new Map();
+      for (const row of rows) {
+        const key = trackingAggregationKey(row);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(row);
+      }
+      return [...groups.entries()].map(([trackingKey, products]) => {
+        const representative = [...products].sort((a, b) => b.amount - a.amount)[0];
+        return {
+          ...representative,
+          trackingKey,
+          trackingName: candidateGroupName(representative),
+          productCount: products.length,
+          products,
+          amount: products.reduce((sum, row) => sum + Math.max(row.amount || 0, 0), 0),
+          changePct: weightedGroupValue(products, "changePct"),
+          ma20: weightedGroupValue(products, "ma20"),
+          ma60: weightedGroupValue(products, "ma60"),
+          turnover: weightedGroupValue(products, "turnover"),
+          activityPercentile: weightedGroupValue(products, "activityPercentile"),
+          activitySampleSize: Math.max(...products.map((row) => row.activitySampleSize || 0), 0)
+        };
+      });
+    }
+
+    function groupCandidates(rows) {
+      const groups = new Map();
+      for (const row of rows) {
+        const key = `${row.sector}:${candidateGroupName(row)}`;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(row);
+      }
+      return [...groups.entries()].map(([key, members]) => {
+        const sorted = [...members].sort((a, b) => b.candidateScore - a.candidateScore || b.amount - a.amount);
+        const leader = sorted[0];
+        return {
+          ...leader,
+          candidateGroupKey: key,
+          candidateGroupName: candidateGroupName(leader),
+          candidateGroupCount: members.length,
+          candidateGroupAmount: members.reduce((sum, row) => sum + row.amount, 0),
+          candidateGroupCodes: sorted.slice(0, 4).map((row) => row.code)
+        };
+      }).sort((a, b) => b.candidateScore - a.candidateScore || b.candidateGroupAmount - a.candidateGroupAmount);
+    }
+
+    function candidateScore(row) {
+      if (!isMarketRow(row)) return -1;
+      if (row.amount < 1 || (row.turnover !== null && row.turnover < 0.3)) return -1;
+
+      if (row.ma20 === null || row.ma60 === null) {
+        if (row.changePct >= 0) return -1;
+        const intradayDip = Math.abs(row.changePct) * 5;
+        const liquidity = clamp(Math.log10(Math.max(row.amount, 1)) * 10 + row.turnover, 0, 28);
+        return Math.round(clamp(intradayDip + liquidity, 0, 72));
+      }
+
+      const oversold = Math.abs(Math.min(row.ma20, 0)) * 2.4 + Math.abs(Math.min(row.ma60, 0)) * 1.8;
+      const liquidity = clamp(Math.log10(Math.max(row.amount, 1)) * 12 + row.turnover * 1.1, 0, 34);
+      const today = row.changePct > 0 ? clamp(row.changePct * 1.5, 0, 8) : 0;
+      return Math.round(clamp(oversold + liquidity + today, 0, 99));
+    }
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, { cache: "no-store" });
+      const text = await response.text();
+      let payload = null;
+      try {
+        payload = JSON.parse(text);
+      } catch (_) {
+        payload = null;
+      }
+      if (!response.ok) throw new Error(payload?.error || text || `HTTP ${response.status}`);
+      return payload;
+    }
+
+    function parseKlineLine(line) {
+      const parts = String(line).split(",");
+      const date = parts[0];
+      const open = num(parts[1]);
+      const close = num(parts[2]);
+      if (!date || close === null) return null;
+      return {
+        date,
+        open: open ?? close,
+        close,
+        volume: num(parts[5], 0),
+        amount: num(parts[6]) === null ? null : num(parts[6]) / 100000000,
+        turnover: num(parts[10])
+      };
+    }
+
+    function resetKlineMetrics(rows) {
+      const historicalMode = state.analysisDate < todayIso();
+      for (const row of rows) {
+        row.price = historicalMode ? null : row.livePrice;
+        row.changePct = historicalMode ? null : row.liveChangePct;
+        row.amount = historicalMode ? null : row.liveAmount;
+        row.turnover = historicalMode ? null : row.liveTurnover;
+        row.ma20 = null;
+        row.ma60 = null;
+        row.klineDate = "";
+        row.klineSeries = [];
+        row.activityPercentile = null;
+        row.activitySampleSize = 0;
+        row.candidateScore = candidateScore(row);
+        row.score = scoreEtf(row);
+      }
+    }
+
+    function valuationFields(row) {
+      return {
+        pe: row.pe, pb: row.pb, metric: row.valuationMetric, value: row.valuationValue,
+        level: row.valuationLevel, percentile: row.valuationPct, belowTime: row.valuationBelowTime,
+        source: row.valuationSource, date: row.valuationDate, proxy: row.valuationProxy,
+        valuationMissingReason: row.valuationMissingReason, indexId: row.indexId, indexName: row.indexName
+      };
+    }
+
+    function applyValuation(row, valuation = {}) {
+      row.pe = valuation.pe ?? null;
+      row.pb = valuation.pb ?? null;
+      row.valuationMetric = valuation.metric || "";
+      row.valuationValue = valuation.value ?? null;
+      row.valuationLevel = valuation.level || "";
+      row.valuationPct = valuation.percentile ?? null;
+      row.valuationBelowTime = valuation.belowTime ?? null;
+      row.valuationSource = valuation.source || "";
+      row.valuationDate = valuation.date || "";
+      row.valuationProxy = Boolean(valuation.proxy);
+      row.valuationMissingReason = valuation.source ? "" : (valuation.valuationMissingReason || row.valuationMissingReason || "该日期未返回历史估值");
+      if (valuation.indexId) row.indexId = valuation.indexId;
+      if (valuation.indexName) row.indexName = valuation.indexName;
+    }
+
+    function restoreLiveValuations() {
+      for (const row of state.rows) applyValuation(row, state.liveValuations.get(row.code) || {});
+      state.valuationHistoryLoading = false;
+    }
+
+    function clearHistoricalValuations() {
+      for (const row of state.rows) applyValuation(row, { valuationMissingReason: "正在加载该日期的历史估值" });
+      state.valuationHistoryLoading = true;
+    }
+
+    async function loadHistoricalValuations(date, run) {
+      try {
+        const payload = await fetchJson(`${VALUATION_API}?date=${encodeURIComponent(date)}&_=${Date.now()}`);
+        if (run !== state.analysisRun || date !== state.analysisDate) return;
+        const valuations = payload?.data || {};
+        for (const row of state.rows) applyValuation(row, valuations[row.code] || { valuationMissingReason: "该日期未返回历史估值" });
+      } catch (error) {
+        if (run !== state.analysisRun || date !== state.analysisDate) return;
+        for (const row of state.rows) applyValuation(row, { valuationMissingReason: `历史估值暂不可用：${error.message}` });
+      } finally {
+        if (run === state.analysisRun && date === state.analysisDate) {
+          state.valuationHistoryLoading = false;
+          state.summary = summarize(state.rows);
+          renderAll();
+        }
+      }
+    }
+
+    function calculateKlineMa(row, lines, targetDate = state.analysisDate) {
+      const parsed = lines.map(parseKlineLine).filter(Boolean);
+      const target = targetDate || todayIso();
+      const usable = parsed.filter((item) => item.date <= target);
+      if (usable.length < 20) return null;
+      const closes = usable.map((item) => item.close);
+      const latestItem = usable[usable.length - 1];
+      const previousItem = usable[usable.length - 2];
+      const historicalMode = target < todayIso();
+      const latest = latestItem.close;
+      const avg = (items) => items.reduce((sum, value) => sum + value, 0) / items.length;
+      const ma20v = avg(closes.slice(-20));
+      const ma60v = closes.length >= 60 ? avg(closes.slice(-60)) : null;
+      const volumeWindow = usable.slice(-120).filter((item) => item.volume > 0);
+      const activityPercentile = volumeWindow.length >= 20
+        ? volumeWindow.filter((item) => item.volume <= latestItem.volume).length / volumeWindow.length * 100
+        : null;
+      const estimatedAmount = latestItem.volume > 0 ? latestItem.close * latestItem.volume / 1000000 : null;
+      return {
+        price: latest,
+        changePct: previousItem ? ((latest / previousItem.close) - 1) * 100 : row.changePct,
+        amount: historicalMode ? (latestItem.amount > 0 ? latestItem.amount : estimatedAmount) : row.liveAmount,
+        turnover: historicalMode ? (latestItem.turnover > 0 ? latestItem.turnover : null) : row.liveTurnover,
+        ma20: ma20v ? ((latest / ma20v) - 1) * 100 : null,
+        ma60: ma60v ? ((latest / ma60v) - 1) * 100 : null,
+        klineDate: latestItem.date,
+        klineSeries: parsed,
+        activityPercentile,
+        activitySampleSize: volumeWindow.length
+      };
+    }
+
+    async function fetchKlinesBatch(rows) {
+      const rowBySecid = new Map(rows.map((row) => [secid(row), row]));
+      const url = `${KLINES_API}?secids=${encodeURIComponent([...rowBySecid.keys()].join(","))}&_=${Date.now()}`;
+      const payload = await fetchJson(url);
+      const items = payload?.data?.items || [];
+      const updates = [];
+      for (const item of items) {
+        const row = rowBySecid.get(item.secid);
+        if (!row) continue;
+        const ma = calculateKlineMa(row, item.klines || [], state.analysisDate);
+        if (ma) updates.push({ row, ma });
+      }
+      return updates;
+    }
+
+    async function enrichKlines(rows) {
+      if (state.loadingKlines) return;
+      const run = ++state.klineRun;
+      state.loadingKlines = true;
+      resetKlineMetrics(rows);
+      state.klineEffectiveDate = "";
+      const targets = [...rows]
+        .filter(isMarketRow)
+        .sort((a, b) => b.amount - a.amount);
+      let done = 0;
+      let success = 0;
+      els.dataStatus.textContent = `已加载 ${rows.length} 只 ETF；分析日期 ${state.analysisDate}；正在补齐均线 0/${targets.length}`;
+      try {
+        for (let i = 0; i < targets.length; i += KLINE_BATCH_SIZE) {
+          if (run !== state.klineRun) return;
+          const batch = targets.slice(i, i + KLINE_BATCH_SIZE);
+          try {
+            const updates = await fetchKlinesBatch(batch);
+            for (const { row, ma } of updates) {
+              Object.assign(row, ma);
+              if (ma.klineDate && ma.klineDate > state.klineEffectiveDate) state.klineEffectiveDate = ma.klineDate;
+              row.score = scoreEtf(row);
+              row.candidateScore = candidateScore(row);
+            }
+            success += updates.length;
+          } catch (_) {
+            // Batch failures stay visible through the success counter.
+          }
+          done += batch.length;
+          state.summary = summarize(state.rows);
+          els.dataStatus.textContent = `已加载 ${rows.length} 只 ETF；分析日期 ${state.analysisDate}${state.klineEffectiveDate ? `（K线 ${state.klineEffectiveDate}）` : ""}；正在补齐均线 ${success}/${done}`;
+          renderAll();
+          if (i + KLINE_BATCH_SIZE < targets.length) await sleep(KLINE_DELAY_MS);
+        }
+        if (run === state.klineRun) {
+          const historicalScope = state.analysisDate < todayIso() ? `；历史有效产品 ${state.summary.analysisRows.length} 只` : "";
+          els.dataStatus.textContent = `已加载 ${rows.length} 只 ETF；情绪口径 ${state.summary.marketIndexRows.length} 个去重指数族；分析日期 ${state.analysisDate}${state.klineEffectiveDate ? `（K线 ${state.klineEffectiveDate}）` : ""}${historicalScope}；均线补齐完成 ${success}/${targets.length}`;
+        }
+      } finally {
+        if (run === state.klineRun) state.loadingKlines = false;
+      }
+    }
+
+    function marketSnapshot(rows) {
+      const marketIndexRows = aggregateTrackingIndexes(rows);
+      const up = marketIndexRows.filter((row) => row.changePct > 0);
+      const breadth = marketIndexRows.length ? up.length / marketIndexRows.length * 100 : null;
+      const maRows = marketIndexRows.filter((row) => row.ma20 !== null && row.ma60 !== null);
+      const maMedian = median(maRows.map((row) => (row.ma20 + row.ma60) / 2));
+      const amountAvg = marketIndexRows.length ? marketIndexRows.reduce((sum, row) => sum + row.amount, 0) / marketIndexRows.length : 0;
+      const amountTotal = marketIndexRows.reduce((sum, row) => sum + row.amount, 0);
+      const amountUp = up.reduce((sum, row) => sum + row.amount, 0);
+      const amountDirection = amountTotal ? amountUp / amountTotal * 100 : null;
+      const fundDirection = amountDirection === null ? null : Math.round(2 * (amountDirection - 50));
+      const averageChange = marketIndexRows.length ? marketIndexRows.reduce((sum, row) => sum + row.changePct, 0) / marketIndexRows.length : null;
+      const turnoverAvg = marketIndexRows.length ? marketIndexRows.reduce((sum, row) => sum + row.turnover, 0) / marketIndexRows.length : null;
+      const sectorMap = new Map();
+      marketIndexRows.forEach((row) => {
+        const key = row.industryPrimary || row.sector;
+        if (!sectorMap.has(key)) sectorMap.set(key, []);
+        sectorMap.get(key).push(row);
+      });
+      const sectorBreadth = sectorMap.size
+        ? [...sectorMap.values()].filter((items) => items.reduce((sum, row) => sum + row.changePct, 0) / items.length > 0).length / sectorMap.size * 100
+        : null;
+      const ma20Rows = marketIndexRows.filter((row) => row.ma20 !== null);
+      const maRecovery = ma20Rows.length ? ma20Rows.filter((row) => row.ma20 >= 0).length / ma20Rows.length * 100 : null;
+      const components = [breadth, amountDirection, sectorBreadth, maRecovery];
+      const marketHeat = components.every(Number.isFinite) ? Math.round(clamp(
+        breadth * 0.30 + amountDirection * 0.30 + sectorBreadth * 0.20 + maRecovery * 0.20,
+        0,
+        100
+      )) : null;
+      return {
+        marketIndexRows, breadth, maMedian, amountAvg, amountDirection, fundDirection,
+        averageChange, turnoverAvg, sectorBreadth, maRecovery, marketHeat,
+        activityPercentile: median(marketIndexRows.map((row) => row.activityPercentile)),
+        activitySampleSize: median(marketIndexRows.map((row) => row.activitySampleSize))
+      };
+    }
+
+    function historicalMarketRows(rows, targetDate) {
+      return rows.map((row) => {
+        const usable = (row.klineSeries || []).filter((item) => item.date <= targetDate);
+        if (usable.length < 20) return null;
+        const latest = usable[usable.length - 1];
+        const previous = usable[usable.length - 2];
+        const closes = usable.map((item) => item.close);
+        const ma20v = closes.slice(-20).reduce((sum, value) => sum + value, 0) / 20;
+        const ma60v = closes.length >= 60 ? closes.slice(-60).reduce((sum, value) => sum + value, 0) / 60 : null;
+        const volumeWindow = usable.slice(-120).filter((item) => item.volume > 0);
+        return {
+          ...row,
+          price: latest.close,
+          changePct: previous ? ((latest.close / previous.close) - 1) * 100 : 0,
+          ma20: ma20v ? ((latest.close / ma20v) - 1) * 100 : null,
+          ma60: ma60v ? ((latest.close / ma60v) - 1) * 100 : null,
+          amount: latest.amount > 0 ? latest.amount : (latest.volume > 0 ? latest.close * latest.volume / 1000000 : null),
+          turnover: latest.turnover > 0 ? latest.turnover : null,
+          activityPercentile: volumeWindow.length >= 20 ? volumeWindow.filter((item) => item.volume <= latest.volume).length / volumeWindow.length * 100 : null,
+          activitySampleSize: volumeWindow.length,
+          klineDate: latest.date
+        };
+      }).filter(Boolean);
+    }
+
+    function heatChange3d(marketRows, currentSnapshot, targetDate) {
+      const dates = [...new Set(marketRows.flatMap((row) => (row.klineSeries || []).map((item) => item.date).filter((date) => date <= targetDate)))].sort();
+      const currentIndex = dates.lastIndexOf(targetDate);
+      if (currentIndex < 3 || currentSnapshot.marketHeat === null) return { value: null, date: "" };
+      const priorDate = dates[currentIndex - 3];
+      const priorRows = historicalMarketRows(marketRows, priorDate);
+      if (priorRows.length < Math.max(40, Math.min(150, Math.round(marketRows.length * 0.1)))) return { value: null, date: priorDate };
+      const prior = marketSnapshot(priorRows);
+      return { value: prior.marketHeat === null ? null : currentSnapshot.marketHeat - prior.marketHeat, date: priorDate };
+    }
+
+    function summarize(rows) {
+      const historical = state.analysisDate !== todayIso();
+      // A product without a K-line on the selected date is not treated as tradable then.
+      const analysisRows = historical ? rows.filter((row) => isMarketRow(row) && row.klineDate) : rows;
+      const marketRows = analysisRows.filter(isMarketRow);
+      const snapshot = marketSnapshot(marketRows);
+      const marketIndexRows = snapshot.marketIndexRows;
+      const valued = analysisRows.filter((row) => Number.isFinite(row.valuationPct));
+      const direct = valued.filter((row) => !row.valuationProxy);
+      const proxy = valued.filter((row) => row.valuationProxy);
+      const pcts = valued.map((row) => row.valuationPct).filter(Number.isFinite);
+      const valuationMedian = median(pcts);
+      const low = valued.filter((row) => row.valuationPct <= 30);
+      const mid = valued.filter((row) => row.valuationPct > 30 && row.valuationPct <= 70);
+      const high = valued.filter((row) => row.valuationPct > 70);
+      const snapshotDate = marketRows.map((row) => row.klineDate).filter(Boolean).sort().at(-1) || "";
+      const heatTrend = snapshotDate ? heatChange3d(marketRows, snapshot, snapshotDate) : { value: null, date: "" };
+      const rawCandidates = [...analysisRows]
+        .map((row) => {
+          row.candidateScore = candidateScore(row);
+          return row;
+        })
+        .filter((row) => row.candidateScore >= 45)
+        .sort((a, b) => b.candidateScore - a.candidateScore || b.amount - a.amount);
+      const candidates = groupCandidates(rawCandidates);
+      return { analysisRows, marketRows, marketIndexRows, valued, direct, proxy, valuationMedian, low, mid, high, rawCandidates, candidates, historical, snapshotDate, heatChange3d: heatTrend.value, heatTrendDate: heatTrend.date, ...snapshot };
+    }
+
+    function filteredCandidateGroups() {
+      const raw = state.summary?.rawCandidates || [];
+      const rows = state.candidateValuation === "all"
+        ? raw
+        : raw.filter((row) => valuationClass(row) === state.candidateValuation);
+      return groupCandidates(rows);
+    }
+
+    function opportunityCandidateGroups() {
+      const raw = state.summary?.rawCandidates || [];
+      const rows = state.valuation === "all"
+        ? raw
+        : raw.filter((row) => valuationClass(row) === state.valuation);
+      return groupCandidates(rows);
+    }
+
+    function combinedTaxonomyDisplay(row) {
+      const labels = [
+        taxonomyDisplay(row, "industry"),
+        taxonomyDisplay(row, "style"),
+        taxonomyDisplay(row, "theme")
+      ].filter((value) => value && value !== "--");
+      return labels.join(" | ") || "未分类";
+    }
+
+    function renderCandidateValuationFilter() {
+      const raw = state.summary?.rawCandidates || [];
+      const counts = { low: 0, mid: 0, high: 0, missing: 0 };
+      raw.forEach((row) => { counts[valuationClass(row)] += 1; });
+      const selected = state.candidateValuation;
+      els.candidateValuationFilter.innerHTML = [
+        `<option value="all">全部估值 (${raw.length})</option>`,
+        `<option value="low">低估 (${counts.low})</option>`,
+        `<option value="mid">适中 (${counts.mid})</option>`,
+        `<option value="high">高估 (${counts.high})</option>`,
+        `<option value="missing">无估值 (${counts.missing})</option>`
+      ].join("");
+      els.candidateValuationFilter.value = selected;
+    }
+
+    function reboundConditions(summary) {
+      if (!summary) return { items: [], passed: 0, total: 0, historical: false };
+      const technical = [
+        {
+          label: "超跌",
+          pass: summary.maMedian !== null && summary.maMedian <= -3,
+          detail: summary.maMedian === null ? "等待均线" : `20/60日 ${pct(summary.maMedian)}`
+        },
+        {
+          label: "低位回暖",
+          pass: summary.marketHeat !== null && summary.marketHeat <= 40 && summary.heatChange3d !== null && summary.heatChange3d > 0,
+          detail: summary.marketHeat === null ? "等待热度" : summary.heatChange3d === null ? `热度 ${summary.marketHeat}，等待3日变化` : `热度 ${summary.marketHeat}，3日 ${summary.heatChange3d >= 0 ? "+" : ""}${summary.heatChange3d}`
+        },
+        {
+          label: "止跌确认",
+          pass: (summary.fundDirection ?? -101) >= 0 || (summary.averageChange ?? -999) >= 0,
+          detail: summary.fundDirection === null ? "等待成交方向" : `资金方向 ${summary.fundDirection >= 0 ? "+" : ""}${summary.fundDirection}`
+        }
+      ];
+      const macro = macroCondition();
+      const macroReady = !state.macro?.loading && Object.keys(state.macro?.metrics || {}).length > 0;
+      const environment = [
+        { label: "宏观未收紧", pass: macroReady && macro.level !== "收紧", detail: macroReady ? macro.level : "等待宏观历史数据" },
+        {
+          label: "估值不过热",
+          pass: summary.valuationMedian !== null && summary.valuationMedian <= 70,
+          detail: summary.valuationMedian === null ? "估值待接入" : `中位数 ${Math.round(summary.valuationMedian)}%`
+        }
+      ];
+      const allConditions = [...environment, ...technical];
+      return {
+        items: allConditions,
+        passed: allConditions.filter((item) => item.pass).length,
+        total: allConditions.length,
+        technicalPassed: technical.filter((item) => item.pass).length,
+        technicalTotal: technical.length,
+        environment,
+        environmentPassed: environment.filter((item) => item.pass).length,
+        historical: summary.historical,
+        macro
+      };
+    }
+
+    function executionSettings() {
+      return {
+        conservative: { label: "保守", shortTrial: 3, shortFull: 4, shortCap: "0.5x", mediumBase: "0x", mediumConfirmed: "0.5x", mediumMinMa: 0, mediumMaxHeat: 65, longCap: "1.5x" },
+        neutral: { label: "中性", shortTrial: 2, shortFull: 3, shortCap: "1x", mediumBase: "0.5x", mediumConfirmed: "1x", mediumMinMa: -1, mediumMaxHeat: 75, longCap: "2x" },
+        aggressive: { label: "激进", shortTrial: 1, shortFull: 2, shortCap: "1.5x", mediumBase: "0.5x", mediumConfirmed: "1.5x", mediumMinMa: -2, mediumMaxHeat: 85, longCap: "2x" }
+      }[state.executionSensitivity] || { label: "中性", shortTrial: 2, shortFull: 3, shortCap: "1x", mediumBase: "0.5x", mediumConfirmed: "1x", mediumMinMa: -1, mediumMaxHeat: 75, longCap: "2x" };
+    }
+
+    function shortAllocation(summary, conditions, settings) {
+      const macroBlocked = !conditions.environment?.[0]?.pass;
+      const valuationMissing = summary.valuationMedian === null;
+      const valuationHigh = summary.valuationMedian !== null && summary.valuationMedian > 70;
+      if (macroBlocked) return { dca: "0x", cls: "yellow", title: "宏观收紧，只观察", text: "宏观是短期交易硬门槛，不新开 1–14 天仓位。" };
+      if (valuationMissing) return { dca: "0x", cls: "yellow", title: "估值待接入，只观察", text: "估值是短期交易的环境门槛；数据缺失时不把超跌直接当成买点。" };
+      if (valuationHigh) return { dca: "0x", cls: "red", title: "估值偏高，不追反弹", text: "市场整体估值偏高，等待更便宜的价格或更完整的止跌确认。" };
+      if (conditions.technicalPassed < settings.shortTrial) return { dca: "0x", cls: "yellow", title: "条件不足，加入观察", text: `技术条件 ${conditions.technicalPassed}/${conditions.technicalTotal}；${settings.label}档等待更多反弹确认。` };
+      if (conditions.technicalPassed < settings.shortFull) return { dca: "0.5x", cls: "yellow", title: "允许小仓试仓", text: "仅做第一笔试仓，严格设置 14 天内的退出条件。" };
+      return { dca: settings.shortCap, cls: "green", title: "反弹条件齐备", text: `${settings.label}档允许分批试仓；短期交易最高不超过 ${settings.shortCap}。` };
+    }
+
+    function mediumAllocation(summary, conditions, settings) {
+      const macroBlocked = !conditions.environment?.[0]?.pass;
+      const valuationMissing = summary.valuationMedian === null;
+      const valuationHigh = summary.valuationMedian !== null && summary.valuationMedian > 70;
+      const trendConfirmed = summary.maMedian !== null && summary.maMedian >= settings.mediumMinMa && summary.marketHeat !== null && summary.marketHeat <= settings.mediumMaxHeat && (summary.fundDirection ?? -101) >= 0;
+      if (macroBlocked) return { dca: "0x", cls: "yellow", title: "宏观收紧，等待中期趋势", text: "2–12 周波段不在流动性收紧环境中逆势开仓。" };
+      if (valuationMissing) return { dca: "0x", cls: "yellow", title: "估值待接入，只观察", text: "中期波段先确认估值环境，缺失时不根据技术信号加仓。" };
+      if (valuationHigh) return { dca: "0x", cls: "red", title: "估值偏高，等待回撤", text: "中期波段不在市场整体高估且偏热时追高。" };
+      if (trendConfirmed) return { dca: settings.mediumConfirmed, cls: "green", title: "趋势确认，可分批介入", text: "资金方向、均线与热度没有明显冲突，按中期节奏分批建仓。" };
+      return { dca: settings.mediumBase, cls: "yellow", title: "趋势未确认，保留观察仓", text: "保留小额观察仓或等待；市场偏热、均线走弱或资金方向不明确时不加速。" };
+    }
+
+    function longAllocation(summary, conditions, settings) {
+      const macroBlocked = !conditions.environment?.[0]?.pass;
+      const valuationPct = summary.valuationMedian;
+      const valuationMissing = valuationPct === null;
+      const valuationHigh = valuationPct !== null && valuationPct > 70;
+      const valuationLow = valuationPct !== null && valuationPct <= 30;
+      if (macroBlocked) return { dca: "0.5x", cls: "yellow", title: "宏观逆风，定投减量", text: "长期计划不断供，但本期降至半档，避免在资金收紧期加速投入。" };
+      if (valuationMissing) return { dca: "0.5x", cls: "yellow", title: "估值待接入，定投减量", text: "长期计划不断供，但在估值覆盖不足时只保留半档，避免把未知当成低估。" };
+      if (valuationHigh) return { dca: "0.25x", cls: "red", title: "估值偏高，定投防守", text: "保留微量投入，避免在高估与偏热阶段加速。" };
+      if (valuationLow && conditions.technicalPassed >= 2) return { dca: settings.longCap, cls: "green", title: "低估区，定投加速", text: `低估且市场状态改善，${settings.label}档分批提高本期投入。` };
+      if (valuationLow) return { dca: "1.5x", cls: "green", title: "低估区，正常加速", text: "长期估值已给出安全边际，按计划分批提高投入。" };
+      return { dca: "1x", cls: "yellow", title: "按长期基准投入", text: "短线热度不会改变长期计划；本期按基准投入，不额外追涨。" };
+    }
+
+    function decision(summary) {
+      if (!summary) return { light: "黄灯", cls: "yellow", dca: "--", title: "等待数据", text: "数据加载后生成建议。", conditions: reboundConditions(summary) };
+      const conditions = reboundConditions(summary);
+      const settings = executionSettings();
+      const short = shortAllocation(summary, conditions, settings);
+      const medium = mediumAllocation(summary, conditions, settings);
+      const long = longAllocation(summary, conditions, settings);
+      let result;
+      if (state.strategyProfile === "medium") result = { light: medium.cls === "green" ? "绿灯" : medium.cls === "red" ? "红灯" : "黄灯", ...medium, conditions };
+      else if (state.strategyProfile === "long") result = { light: long.cls === "green" ? "绿灯" : long.cls === "red" ? "红灯" : "黄灯", ...long, conditions };
+      if (state.strategyProfile === "blend") {
+        const light = short.cls === "green" || long.cls === "green" ? "绿灯" : long.cls === "red" && short.dca === "0x" ? "红灯" : "黄灯";
+        result = {
+          light,
+          cls: light === "绿灯" ? "green" : light === "红灯" ? "red" : "yellow",
+          dca: `核心 ${long.dca} + 战术 ${short.dca}`,
+          title: "长短结合：核心与战术分账",
+          text: `核心仓：${long.title}；战术仓：${short.title}。两部分独立执行，短线失败不挪用核心仓补仓。`,
+          conditions
+        };
+      }
+      if (!result) result = { light: short.cls === "green" ? "绿灯" : short.cls === "red" ? "红灯" : "黄灯", ...short, conditions };
+      if (!summary.historical) return result;
+      return {
+        ...result,
+        title: `历史截面：${result.title}`,
+        text: `仅使用不晚于 ${state.analysisDate} 的宏观、估值与当日技术数据。${result.text}`
+      };
+    }
+
+    function valuationAggregationKey(row) {
+      return row.indexId || row.indexName || `${row.exchange}.${row.code}`;
+    }
+
+    function sectorSummary(rows, groupBy = (row) => row.sector, fixedGroups = []) {
+      const map = new Map();
+      fixedGroups.forEach((sector) => map.set(sector, { sector, rows: [], valued: [] }));
+      for (const row of rows) {
+        const sector = groupBy(row);
+        if (!sector) continue;
+        if (!map.has(sector)) map.set(sector, { sector, rows: [], valued: [] });
+        const item = map.get(sector);
+        item.rows.push(row);
+        if (row.valuationPct !== null) item.valued.push(row);
+      }
+      return [...map.values()].map((item) => {
+        const valued = [...new Map(item.valued.map((row) => [valuationAggregationKey(row), row])).values()];
+        const med = median(valued.map((row) => row.valuationPct));
+        return { ...item, valued, median: med, level: med === null ? "待接入" : med <= 30 ? "低估" : med <= 70 ? "适中" : "高估" };
+      }).sort((a, b) => (a.median ?? 999) - (b.median ?? 999));
+    }
+
+    function missingReasons(rows) {
+      const map = new Map();
+      for (const row of rows) {
+        if (row.valuationSource) continue;
+        const key = row.valuationMissingReason || "无估值源";
+        map.set(key, (map.get(key) || 0) + 1);
+      }
+      return [...map.entries()].sort((a, b) => b[1] - a[1]);
+    }
+
+    function reasonAction(reason) {
+      if (/不适用/.test(reason)) return "不展示 PE/PB，改用收益率或久期等指标。";
+      if (/农业|光伏|周期|匹配/.test(reason)) return "继续补细分指数，未确认前不硬填。";
+      return "保留缺口标记，避免假精确。";
+    }
+
+    function formatMacroMetric(metric) {
+      if (!metric || !Number.isFinite(Number(metric.value))) return "--";
+      const value = Number(metric.value);
+      if (metric.id === "XAU") return `$${value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+      if (metric.unit === "%") return `${value.toFixed(2)}%`;
+      return value.toFixed(2);
+    }
+
+    function setMacroMetric(valueId, subId, metric, error) {
+      const value = document.getElementById(valueId);
+      const sub = document.getElementById(subId);
+      if (!value || !sub) return;
+      value.textContent = formatMacroMetric(metric);
+      sub.textContent = metric
+        ? `来源：${metric.source}；最新观察 ${metric.date}${metric.cached ? "；缓存" : ""}`
+        : `来源暂不可用：${error || "未返回数据"}`;
+    }
+
+    function macroCondition() {
+      const metrics = state.macro?.metrics || {};
+      const tips = Number(metrics.DFII10?.value);
+      const shibor = metrics.SHIBOR3M;
+      const shibor5d = Number(shibor?.change5dBp);
+      const shibor20d = Number(shibor?.change20dBp);
+      if (!Object.keys(metrics).length) return { level: "未确认", tone: "中性", score: 50, text: "宏观来源尚未返回，不以静态数据替代。" };
+
+      const profiles = {
+        stable: {
+          label: "稳健档",
+          tipsHigh: 2.25,
+          tipsLow: 1.40,
+          shibor20High: 5,
+          shibor5High: 6,
+          shibor20Low: -5,
+          requiredSignals: 2,
+          note: "稳健档：10Y TIPS ≥ 2.25%，且 SHIBOR 3M 20日 ≥ +5bp 或 5日 ≥ +6bp，才判定为收紧。"
+        },
+        balanced: {
+          label: "均衡档",
+          tipsHigh: 2.00,
+          tipsLow: 1.50,
+          shibor20High: 3,
+          shibor5High: 4,
+          shibor20Low: -3,
+          requiredSignals: 2,
+          note: "均衡档：10Y TIPS ≥ 2.00%，且 SHIBOR 3M 20日 ≥ +3bp 或 5日 ≥ +4bp，才判定为收紧。"
+        },
+        sensitive: {
+          label: "灵敏档",
+          tipsHigh: 1.85,
+          tipsLow: 1.65,
+          shibor20High: 2,
+          shibor5High: 3,
+          shibor20Low: -2,
+          requiredSignals: 1,
+          note: "灵敏档：10Y TIPS ≥ 1.85%，或 SHIBOR 3M 20日 ≥ +2bp / 5日 ≥ +3bp，任一维度即可触发收紧。"
+        }
+      };
+      const profile = profiles[state.macroSensitivity] || profiles.balanced;
+      const externalPressure = Number.isFinite(tips) && tips >= profile.tipsHigh;
+      const externalRelief = Number.isFinite(tips) && tips <= profile.tipsLow;
+      const domesticPressure = (Number.isFinite(shibor20d) && shibor20d >= profile.shibor20High)
+        || (Number.isFinite(shibor5d) && shibor5d >= profile.shibor5High);
+      const domesticRelief = Number.isFinite(shibor20d) && shibor20d <= profile.shibor20Low;
+      const pressureSignals = Number(externalPressure) + Number(domesticPressure);
+      const reliefSignals = Number(externalRelief) + Number(domesticRelief);
+      let score = 52;
+      const notes = [];
+      if (externalPressure) { score -= 10; notes.push("美国实际利率偏高"); }
+      else if (externalRelief) { score += 8; notes.push("实际利率压力缓和"); }
+      if (domesticPressure) { score -= 14; notes.push("国内 3M 资金面走紧"); }
+      else if (domesticRelief) { score += 10; notes.push("国内 3M 资金面边际宽松"); }
+      score = Math.round(clamp(score, 20, 80));
+      const prefix = `${profile.label}：${notes.join("；") || "宏观变量没有形成一致方向"}`;
+      if (pressureSignals >= profile.requiredSignals) {
+        const confirmation = profile.requiredSignals === 1
+          ? "至少一个风险维度已达到灵敏档阻断条件"
+          : "外部折现压力与国内资金面已共同达到当前档位的阻断条件";
+        return { level: "收紧", tone: "逆风", score, text: `${prefix}。${confirmation}。` };
+      }
+      if (reliefSignals >= profile.requiredSignals) {
+        const confirmation = profile.requiredSignals === 1 ? "至少一个维度已明显改善" : "外部与国内两个维度共同改善";
+        return { level: "改善", tone: "顺风", score, text: `${prefix}。${confirmation}，仍需市场情绪确认。` };
+      }
+      if (pressureSignals) return { level: "中性偏谨慎", tone: "适中", score, text: `${prefix}，但另一维度未确认收紧。不追高，保留基准风险敞口。` };
+      if (reliefSignals) return { level: "中性偏改善", tone: "适中", score, text: `${prefix}，但尚未得到另一维度确认。` };
+      return { level: "中性", tone: "适中", score, text: `${prefix}。维持基准风险敞口，等待情绪与价格确认。` };
+    }
+
+    function renderMacro() {
+      const macro = state.macro || {};
+      const metrics = macro.metrics || {};
+      const errors = macro.errors || {};
+      setMacroMetric("macroDollarValue", "macroDollarSub", metrics.DXY, errors.DXY);
+      setMacroMetric("macroTenYearValue", "macroTenYearSub", metrics.DGS10, errors.DGS10);
+      setMacroMetric("macroTipsValue", "macroTipsSub", metrics.DFII10, errors.DFII10);
+      setMacroMetric("macroCnyValue", "macroCnySub", metrics.DEXCHUS, errors.DEXCHUS);
+      setMacroMetric("macroGoldValue", "macroGoldSub", metrics.XAU, errors.XAU);
+      setMacroMetric("macroShiborValue", "macroShiborSub", metrics.SHIBOR3M, errors.SHIBOR3M);
+
+      const shibor = metrics.SHIBOR3M;
+      const updateChange = (valueId, subId, change, label) => {
+        const value = document.getElementById(valueId);
+        const sub = document.getElementById(subId);
+        if (!value || !sub) return;
+        value.textContent = Number.isFinite(change) ? `${change > 0 ? "+" : ""}${change.toFixed(1)} bp` : "--";
+        sub.textContent = Number.isFinite(change)
+          ? `${label}：${change > 0 ? "资金偏紧" : change < 0 ? "边际宽松" : "基本持平"}${shibor?.historyDate ? `；历史截至 ${shibor.historyDate}` : ""}`
+          : `官方历史序列暂不可用：${shibor?.historyError || "未返回足够交易日"}`;
+      };
+      updateChange("macroShibor5dValue", "macroShibor5dSub", shibor?.change5dBp, "5日变化");
+      updateChange("macroShibor20dValue", "macroShibor20dSub", shibor?.change20dBp, "20日变化");
+
+      const condition = macroCondition();
+      const title = document.getElementById("macroConclusionTitle");
+      const text = document.getElementById("macroConclusionText");
+      title.textContent = `宏观状态：${condition.level}`;
+      text.textContent = condition.text;
+      els.macroSensitivity.value = state.macroSensitivity;
+      const sensitivityNotes = {
+        stable: "稳健档：10Y TIPS ≥ 2.25%，且 SHIBOR 3M 20日 ≥ +5bp 或 5日 ≥ +6bp，才判定为收紧。",
+        balanced: "均衡档：10Y TIPS ≥ 2.00%，且 SHIBOR 3M 20日 ≥ +3bp 或 5日 ≥ +4bp，才判定为收紧。",
+        sensitive: "灵敏档：10Y TIPS ≥ 1.85%，或 SHIBOR 3M 20日 ≥ +2bp / 5日 ≥ +3bp，任一维度即可触发收紧。"
+      };
+      els.macroSensitivityNote.textContent = sensitivityNotes[state.macroSensitivity] || sensitivityNotes.balanced;
+    }
+
+    async function loadMacroData(date = state.analysisDate) {
+      const run = ++state.macroRun;
+      const historical = date < todayIso();
+      state.macro = { requestedDate: date, historical, loading: true, metrics: {}, errors: {} };
+      renderMacro();
+      try {
+        const payload = await fetchJson(`${MACRO_API}?date=${encodeURIComponent(date)}&_=${Date.now()}`);
+        if (run !== state.macroRun || date !== state.analysisDate) return;
+        state.macro = payload;
+      } catch (error) {
+        if (run !== state.macroRun || date !== state.analysisDate) return;
+        state.macro = { metrics: {}, errors: { SHIBOR3M: error.message } };
+      }
+      if (state.rows.length) state.summary = summarize(state.rows);
+      renderMacro();
+      if (state.summary) { renderOverview(); renderSentiment(); }
+    }
+
+    async function loadData() {
+      const analysisRun = ++state.analysisRun;
+      state.klineRun += 1;
+      state.loadingKlines = false;
+      els.dataStatus.textContent = "正在加载 ETF 数据";
+      els.refreshBtn.disabled = true;
+      void loadMacroData(state.analysisDate);
+      try {
+        const payload = await fetchJson(`${QUOTE_API}?_=${Date.now()}`);
+        state.rows = (payload?.data?.diff || [])
+          .map(normalize)
+          .filter((row) => row.code && row.price !== null && row.price > 0)
+          .sort((a, b) => b.amount - a.amount);
+        state.liveValuations = new Map(state.rows.map((row) => [row.code, valuationFields(row)]));
+        if (state.analysisDate < todayIso()) {
+          clearHistoricalValuations();
+          void loadHistoricalValuations(state.analysisDate, analysisRun);
+        } else {
+          state.valuationHistoryLoading = false;
+        }
+        state.summary = summarize(state.rows);
+        els.dataStatus.textContent = `已加载 ${state.rows.length} 只 ETF；情绪口径 ${state.summary.marketIndexRows.length} 个去重指数族；分析日期 ${state.analysisDate}`;
+        els.updatedAt.textContent = new Date().toLocaleString("zh-CN", { hour12: false });
+        renderAll();
+        enrichKlines(state.rows);
+      } catch (error) {
+        els.dataStatus.textContent = `加载失败：${error.message}`;
+      } finally {
+        els.refreshBtn.disabled = false;
+      }
+    }
+
+    function rerunForAnalysisDate() {
+      const analysisRun = ++state.analysisRun;
+      const nextDate = els.analysisDate.value || todayIso();
+      state.analysisDate = nextDate;
+      state.klineRun += 1;
+      state.loadingKlines = false;
+      void loadMacroData(state.analysisDate);
+      if (state.analysisDate < todayIso()) {
+        clearHistoricalValuations();
+        void loadHistoricalValuations(state.analysisDate, analysisRun);
+      } else {
+        restoreLiveValuations();
+      }
+      resetKlineMetrics(state.rows);
+      state.summary = summarize(state.rows);
+      els.dataStatus.textContent = `已加载 ${state.rows.length} 只 ETF；情绪口径 ${state.summary.marketIndexRows.length} 个去重指数族；分析日期 ${state.analysisDate}；等待均线补齐`;
+      renderAll();
+      enrichKlines(state.rows);
+    }
+
+    function setTileClass(el, level) {
+      el.classList.remove("greenish", "yellowish", "redish", "blueish");
+      if (level === "低估" || level === "顺风" || level === "超跌") el.classList.add("greenish");
+      else if (level === "高估" || level === "逆风" || level === "过热") el.classList.add("redish");
+      else el.classList.add("yellowish");
+    }
+
+    function renderOverview() {
+      const s = state.summary;
+      const d = decision(s);
+      els.strategyProfile.value = state.strategyProfile;
+      els.executionSensitivity.value = state.executionSensitivity;
+      els.disciplineStrategyProfile.value = state.strategyProfile;
+      els.disciplineExecutionSensitivity.value = state.executionSensitivity;
+      const historicalMode = Boolean(s?.historical);
+      [els.strategyProfile, els.executionSensitivity, els.disciplineStrategyProfile, els.disciplineExecutionSensitivity].forEach((control) => {
+        control.disabled = false;
+        control.title = historicalMode ? "历史截面会按所选周期和敏感度给出当日建议。" : "";
+      });
+      els.trafficLight.textContent = d.light;
+      els.trafficReason.textContent = d.text;
+      els.lightCard.className = `metric ${d.cls === "green" ? "greenish" : d.cls === "red" ? "redish" : "yellowish"}`;
+      const light = els.lightCard.querySelector(".light");
+      light.className = `light ${d.cls}`;
+      light.querySelector(".dot").className = `dot ${d.cls}`;
+      els.dcaValue.textContent = d.dca;
+      els.dcaReason.textContent = d.title;
+      els.reboundConditionValue.textContent = s ? `${d.conditions.passed}/${d.conditions.total}` : "--";
+      els.reboundConditionSub.textContent = !s ? "等待行情与均线数据。" : d.conditions.historical
+        ? `历史截面：5 项条件均取不晚于 ${state.analysisDate} 的数据；环境准入 ${d.conditions.environmentPassed}/2。`
+        : `共 5 项：宏观、估值、超跌、低位回暖、止跌确认；环境准入 ${d.conditions.environmentPassed}/2。`;
+      els.reboundGates.innerHTML = (d.conditions.items || []).map((item) => `
+        <div class="rebound-gate ${item.pass ? "pass" : item.detail.includes("等待") ? "pending" : "fail"}">
+          <b>${escapeHtml(item.label)} ${item.pass ? "✓" : "—"}</b>
+          <span>${escapeHtml(item.detail)}</span>
+        </div>
+      `).join("") || `<div class="rebound-gate pending"><b>等待数据</b><span>均线补齐后显示条件。</span></div>`;
+      renderCandidateValuationFilter();
+      const candidateGroups = filteredCandidateGroups();
+      els.candidateCount.textContent = s
+        ? state.candidateValuation === "all" ? candidateGroups.length : `${candidateGroups.length}/${s.candidates.length}`
+        : "--";
+
+      const valuationState = s?.valuationMedian === null ? "待接入" : s.valuationMedian <= 30 ? "低估" : s.valuationMedian <= 70 ? "适中" : "高估";
+      const sentimentState = s?.marketHeat === null ? "等待数据" : s.marketHeat < 25 ? "极冷" : s.marketHeat <= 40 ? "偏弱" : s.marketHeat <= 60 ? "中性" : s.marketHeat <= 75 ? "偏强" : "过热";
+      const trendState = s?.maMedian === null ? "待均线" : s.maMedian <= -5 ? "超跌" : s.maMedian < 0 ? "修复中" : "强势";
+
+      const macro = macroCondition();
+      els.macroState.textContent = macro.level;
+      els.macroExplain.textContent = state.macro?.loading
+        ? `${historicalMode ? "正在载入历史" : "正在载入"}宏观数据。`
+        : `${historicalMode ? `截至 ${state.analysisDate}：` : ""}${macro.text}`;
+      setTileClass(els.macroTile, macro.tone);
+      els.valuationState.textContent = valuationState;
+      els.valuationExplain.textContent = state.valuationHistoryLoading
+        ? `正在载入截至 ${state.analysisDate} 的历史估值。`
+        : s?.valuationMedian === null
+          ? "估值源不足。"
+          : `${historicalMode ? `截至 ${state.analysisDate}，` : ""}全市场已覆盖 ETF 的历史估值中位数约 ${Math.round(s.valuationMedian)}%。`;
+      setTileClass(els.valuationTile, valuationState);
+      els.sentimentState.textContent = sentimentState;
+      els.sentimentExplain.textContent = s?.marketHeat === null ? "等待行情。" : `热度 ${s.marketHeat}，3日 ${s.heatChange3d === null ? "待计算" : `${s.heatChange3d >= 0 ? "+" : ""}${s.heatChange3d}`}，${s.marketIndexRows.length} 个去重指数中上涨占比 ${pct(s.breadth)}。`;
+      setTileClass(els.sentimentTile, sentimentState === "极冷" || sentimentState === "偏弱" ? "低估" : sentimentState === "过热" ? "高估" : "适中");
+      els.trendState.textContent = trendState;
+      els.trendExplain.textContent = s?.maMedian === null ? "均线数据尚未补齐。" : `20/60 日均线综合偏离中位数 ${pct(s.maMedian)}。`;
+      setTileClass(els.trendTile, trendState);
+
+      els.operationAdvice.className = `rule ${d.cls === "green" ? "greenish" : d.cls === "red" ? "redish" : "yellowish"}`;
+      els.operationAdvice.innerHTML = `<h3>${escapeHtml(d.title)}</h3><p>${escapeHtml(d.text)}</p>`;
+      renderCandidates();
+    }
+
+    function renderCandidates() {
+      const rows = filteredCandidateGroups().slice(0, 10);
+      els.topCandidates.innerHTML = rows.map((row) => `
+        <article class="candidate">
+          <div>
+            <h3>${escapeHtml(row.candidateGroupName || row.name)} <span class="code">${row.exchange}.${row.code}</span></h3>
+            <p>${escapeHtml(row.name)}${row.candidateGroupCount > 1 ? ` / 同类 ${row.candidateGroupCount} 只 / 组内成交 ${amount(row.candidateGroupAmount)}` : ""}</p>
+            <p>${escapeHtml(row.sector)} / ${formatValuation(row)} / ${formatPosition(row)} / K线 ${escapeHtml(row.klineDate || "--")} / 20/60日 ${pct(row.ma20)} / ${pct(row.ma60)} / 换手 ${pct(row.turnover)} / 成交 ${amount(row.amount)}</p>
+          </div>
+          <div class="rank">${row.candidateScore}</div>
+        </article>
+      `).join("") || `<div class="empty">暂无满足条件的反弹候选。</div>`;
+    }
+
+    function matchesValuationSearch(row) {
+      const tokens = String(state.valuationSearch || "").trim().toLowerCase().split(/\s+/).filter(Boolean);
+      if (!tokens.length) return true;
+      const text = [
+        row.code,
+        `${row.exchange}.${row.code}`,
+        row.name,
+        row.indexName,
+        row.indexId,
+        candidateGroupName(row)
+      ].join(" ").toLowerCase();
+      return tokens.every((token) => text.includes(token));
+    }
+
+    function stepBackValuation() {
+      if (state.valuationDetail !== "all") state.valuationDetail = "all";
+      else if (state.valuationViewMode === "industry" && state.valuationSector !== "all") state.valuationSector = "all";
+    }
+
+    function renderValuation() {
+      const s = state.summary;
+      if (!s) return;
+      const analysisRows = s.analysisRows || state.rows;
+      els.valuationCoverage.textContent = `${s.valued.length}/${analysisRows.length}`;
+      els.valuationCoverageSub.textContent = `直接 ${s.direct.length}，代理 ${s.proxy.length}。`;
+      els.lowValuationCount.textContent = s.low.length;
+      els.midValuationCount.textContent = s.mid.length;
+      els.highValuationCount.textContent = s.high.length;
+      const mode = state.valuationViewMode;
+      const searchableRows = analysisRows.filter(matchesValuationSearch);
+      let boardRows = searchableRows;
+      let groupBy = (row) => taxonomyGroup(row, "industry");
+      let fixedGroups = state.valuationSearch.trim() ? [] : CSI_PRIMARY_INDUSTRIES;
+      let title = "中证一级行业温度图";
+      if (mode === "industry" && state.valuationSector !== "all") {
+        boardRows = searchableRows.filter((row) => row.industryPrimary === state.valuationSector);
+        groupBy = (row) => taxonomyDetail(row, "industry");
+        fixedGroups = [];
+        title = `${state.valuationSector}细分行业温度图`;
+      } else if (mode === "style") {
+        boardRows = searchableRows.filter((row) => row.style);
+        groupBy = (row) => taxonomyGroup(row, "style");
+        fixedGroups = [];
+        title = "宽基与风格温度图";
+      } else if (mode === "theme") {
+        boardRows = searchableRows.filter((row) => row.theme);
+        groupBy = (row) => taxonomyGroup(row, "theme");
+        fixedGroups = [];
+        title = "主题热度图（主题不作为行业估值替代）";
+      }
+      const sectors = sectorSummary(boardRows, groupBy, fixedGroups);
+      if (mode === "industry" && state.valuationSector !== "all" && !CSI_PRIMARY_INDUSTRIES.includes(state.valuationSector)) state.valuationSector = "all";
+      els.valuationBoardTitle.textContent = title;
+      els.valuationLevelFilter.value = state.valuationBoardLevel;
+      els.valuationSearch.value = state.valuationSearch;
+      [...els.valuationModeSwitch.querySelectorAll("[data-valuation-mode]")].forEach((button) => {
+        button.classList.toggle("active", button.dataset.valuationMode === mode);
+        button.setAttribute("aria-pressed", button.dataset.valuationMode === mode ? "true" : "false");
+      });
+
+      const atRoot = state.valuationDetail === "all" && (mode !== "industry" || state.valuationSector === "all");
+      els.valuationBackBtn.hidden = atRoot;
+      if (state.valuationSearch.trim()) {
+        els.valuationGuide.textContent = `正在全市场搜索“${state.valuationSearch.trim()}”；ETF 明细不受当前行业、风格或主题层级限制。`;
+      } else if (mode === "industry" && state.valuationDetail !== "all") {
+        els.valuationGuide.textContent = `当前：${state.valuationSector} > ${state.valuationDetail}。再点当前细分卡片，或点“返回上一级”查看其他细分行业。`;
+      } else if (mode === "industry" && state.valuationSector !== "all") {
+        els.valuationGuide.textContent = `当前：${state.valuationSector}。选择细分行业；再点“行业温度”或返回按钮回到一级行业。`;
+      } else if (mode === "industry") {
+        els.valuationGuide.textContent = "选择一级行业查看细分行业；输入代码、名称或指数可直接定位 ETF。";
+      } else if (state.valuationDetail !== "all") {
+        els.valuationGuide.textContent = `当前：${state.valuationDetail}。再点当前卡片、“${mode === "style" ? "宽基与风格" : "主题热度"}”或返回按钮查看全部分类。`;
+      } else {
+        els.valuationGuide.textContent = `选择一张${mode === "style" ? "风格" : "主题"}卡片筛选 ETF；再次点击即可返回全部分类。`;
+      }
+
+      const levelClass = (level) => level === "低估" ? "low" : level === "适中" ? "mid" : level === "高估" ? "high" : "missing";
+      const visibleSectors = sectors.filter((item) => {
+        if (mode !== "industry" && state.valuationDetail !== "all" && item.sector !== state.valuationDetail) return false;
+        return state.valuationBoardLevel === "all" || levelClass(item.level) === state.valuationBoardLevel;
+      });
+      els.valuationSectorBoard.innerHTML = visibleSectors.map((item) => {
+        const cls = levelClass(item.level);
+        const maMedian = median(item.rows.map((row) => row.ma20 !== null && row.ma60 !== null ? (row.ma20 + row.ma60) / 2 : null));
+        const turnoverAvg = item.rows.length ? item.rows.reduce((sum, row) => sum + num(row.turnover, 0), 0) / item.rows.length : 0;
+        const amountTotal = item.rows.reduce((sum, row) => sum + num(row.amount, 0), 0);
+        const valuationWidth = item.median === null ? 0 : clamp(item.median, 0, 100);
+        const maWidth = maMedian === null ? 50 : clamp(50 + maMedian * 3, 0, 100);
+        const turnoverWidth = clamp(turnoverAvg * 8, 4, 100);
+        const active = state.valuationDetail === item.sector ? " active" : "";
+        return `<button class="valuation-sector${active}" type="button" data-sector="${escapeHtml(item.sector)}">
+          <div class="valuation-sector-head"><h3>${escapeHtml(item.sector)}</h3><span class="badge ${cls}">${item.level}</span></div>
+          <div class="valuation-lines">
+            <div class="valuation-line"><span>估值位置</span><span class="valuation-track"><span class="valuation-fill ${cls}" style="--w:${valuationWidth}%"></span></span><b>${item.median === null ? "待接入" : `${Math.round(item.median)}%`}</b></div>
+            <div class="valuation-line"><span>20/60日</span><span class="valuation-track"><span class="valuation-fill" style="--w:${maWidth}%"></span></span><b>${pct(maMedian)}</b></div>
+            <div class="valuation-line"><span>换手率</span><span class="valuation-track"><span class="valuation-fill turnover" style="--w:${turnoverWidth}%"></span></span><b>${pct(turnoverAvg)}</b></div>
+          </div>
+          <div class="valuation-sector-footer"><span>${item.rows.length} 只 ETF</span><span>成交 ${amount(amountTotal)}</span></div>
+        </button>`;
+      }).join("") || `<div class="empty">没有符合当前筛选条件的板块。</div>`;
+      [...els.valuationSectorBoard.querySelectorAll(".valuation-sector")].forEach((tile) => {
+        tile.addEventListener("click", () => {
+          const sector = tile.dataset.sector;
+          if (mode === "industry" && state.valuationSector === "all") {
+            state.valuationSector = sector;
+            state.valuationDetail = "all";
+          }
+          else state.valuationDetail = state.valuationDetail === sector ? "all" : sector;
+          renderValuation();
+        });
+      });
+
+      const hasSearch = Boolean(state.valuationSearch.trim());
+      let rows = hasSearch
+        ? searchableRows
+        : mode === "industry" ? searchableRows.filter((row) => row.industryPrimary) : boardRows;
+      if (!hasSearch && mode === "industry" && state.valuationSector !== "all") rows = rows.filter((row) => row.industryPrimary === state.valuationSector);
+      if (!hasSearch && state.valuationDetail !== "all") rows = rows.filter((row) => groupBy(row) === state.valuationDetail);
+      if (state.valuationBoardLevel !== "all") rows = rows.filter((row) => valuationClass(row) === state.valuationBoardLevel);
+      rows.sort((a, b) => (a.valuationPct ?? 999) - (b.valuationPct ?? 999) || b.amount - a.amount);
+      els.valuationResultCount.textContent = `${rows.length} 只`;
+      els.valuationEtfRows.innerHTML = rows.slice(0, 260).map((row) => {
+        const cls = valuationClass(row);
+        const indexLabel = [row.indexName, row.indexId].filter(Boolean).join(" / ") || candidateGroupName(row);
+        const categoryLabel = hasSearch
+          ? taxonomyDetail(row, "industry") || taxonomyGroup(row, "industry") || taxonomyGroup(row, "style") || taxonomyGroup(row, "theme") || "--"
+          : mode === "industry" ? row.industrySecondary || row.industryPrimary : groupBy(row) || "--";
+        return `<tr>
+          <td>${escapeHtml(categoryLabel)}</td>
+          <td><span class="code">${row.exchange}.${row.code}</span></td>
+          <td class="name-cell">${escapeHtml(row.name)}${row.valuationProxy ? ' <span class="badge proxy">代理</span>' : ""}<small>${escapeHtml(indexLabel)}</small></td>
+          <td class="num ${row.changePct < 0 ? "green" : row.changePct > 0 ? "red" : ""}">${pct(row.changePct, 2)}</td>
+          <td class="num">${formatValuation(row)}</td>
+          <td><span class="badge ${cls === "low" ? "low" : cls === "mid" ? "mid" : cls === "high" ? "high" : ""}">${escapeHtml(formatPosition(row))}</span></td>
+          <td class="num">${pct(row.ma20)}</td><td class="num">${pct(row.ma60)}</td>
+          <td class="num">${pct(row.turnover)}</td><td class="num">${amount(row.amount)}</td>
+        </tr>`;
+      }).join("") || `<tr><td colspan="10" class="empty">没有符合当前筛选条件的 ETF。</td></tr>`;
+      els.missingReasonRows.innerHTML = missingReasons(analysisRows).map(([reason, count]) => `
+        <tr><td>${escapeHtml(reason)}</td><td class="num">${count}</td><td>${escapeHtml(reasonAction(reason))}</td></tr>
+      `).join("") || `<tr><td colspan="3" class="empty">估值源已全部覆盖。</td></tr>`;
+    }
+
+    function renderSentiment() {
+      const s = state.summary;
+      if (!s) return;
+      const heatTone = (value) => value === null ? "yellowish" : value < 25 ? "greenish" : value <= 40 ? "yellowish" : value > 75 ? "redish" : "yellowish";
+      const heatLabel = s.marketHeat === null ? "等待数据" : s.marketHeat < 25 ? "极冷" : s.marketHeat <= 40 ? "偏弱" : s.marketHeat <= 60 ? "中性" : s.marketHeat <= 75 ? "偏强" : "过热";
+      const heatChange = s.heatChange3d;
+      const directionText = s.fundDirection === null ? "--" : `${s.fundDirection >= 0 ? "+" : ""}${s.fundDirection}`;
+      els.sentimentTemperatureValue.textContent = s.marketHeat ?? "--";
+      els.sentimentTemperatureSub.textContent = s.marketHeat === null ? "等待 ETF 行情与均线载入。" : `${heatLabel}；30% 上涨广度、30% 上涨方向成交额、20% 板块扩散、20% MA20 修复。`;
+      els.attackValue.textContent = heatChange === null ? "--" : `${heatChange >= 0 ? "+" : ""}${heatChange}`;
+      els.attackSub.textContent = heatChange === null ? "等待至少 3 个交易日的均线历史。" : `相对 ${s.heatTrendDate} 的热度变化；低位上升才接近反弹观察区。`;
+      els.breadthValue.textContent = pct(s.breadth);
+      els.breadthSub.textContent = `${s.marketIndexRows.filter((row) => row.changePct > 0).length}/${s.marketIndexRows.length} 个去重指数上涨（来自 ${s.marketRows.length} 只 ETF）。`;
+      els.drawdownValue.textContent = s.maMedian === null ? "--" : pct(s.maMedian);
+      els.amountDirectionValue.textContent = directionText;
+      els.amountDirectionSub.textContent = s.fundDirection === null ? "等待成交额数据。" : `上涨方向成交额占 ${pct(s.amountDirection)}；范围 -100 到 +100，正值偏向上涨。`;
+      els.sectorBreadthValue.textContent = pct(s.sectorBreadth);
+      els.sectorBreadthSub.textContent = s.sectorBreadth === null ? "等待板块数据。" : "按去重指数的一级行业平均涨跌判断扩散。";
+      els.maRecoveryValue.textContent = pct(s.maRecovery);
+      els.maRecoverySub.textContent = s.maRecovery === null ? "均线尚未补齐。" : "站上 20 日均线的去重指数占比。";
+      els.liquidityValue.textContent = s.activityPercentile === null ? "--" : `${Math.round(s.activityPercentile)}%`;
+      els.liquiditySub.textContent = s.activityPercentile === null ? "等待日线成交量历史。" : `去重指数日成交量的历史中位位置；样本约 ${Math.round(s.activitySampleSize || 0)} 日，不等同资金方向。`;
+      els.sentimentTemperatureCard.className = `metric ${heatTone(s.marketHeat)}`;
+      els.attackCard.className = `metric ${heatChange === null ? "yellowish" : s.marketHeat <= 40 && heatChange > 0 ? "greenish" : s.marketHeat >= 75 && heatChange > 0 ? "redish" : "yellowish"}`;
+      els.breadthCard.className = `metric ${s.breadth !== null && s.breadth <= 42 ? "greenish" : s.breadth > 70 ? "redish" : "yellowish"}`;
+      els.drawdownCard.className = `metric ${s.maMedian !== null && s.maMedian <= -5 ? "greenish" : s.maMedian !== null && s.maMedian > 3 ? "redish" : "yellowish"}`;
+      els.amountDirectionCard.className = `metric ${s.fundDirection !== null && s.fundDirection >= 40 ? "greenish" : s.fundDirection !== null && s.fundDirection <= -40 ? "redish" : "yellowish"}`;
+      els.sectorBreadthCard.className = `metric ${s.sectorBreadth !== null && s.sectorBreadth >= 70 ? "redish" : s.sectorBreadth !== null && s.sectorBreadth <= 35 ? "greenish" : "yellowish"}`;
+      els.maRecoveryCard.className = `metric ${s.maRecovery !== null && s.maRecovery >= 75 ? "redish" : s.maRecovery !== null && s.maRecovery <= 30 ? "greenish" : "yellowish"}`;
+      els.liquidityCard.className = `metric ${s.activityPercentile !== null && s.activityPercentile >= 75 ? "blueish" : "yellowish"}`;
+      const d = decision(s);
+      if (s.marketHeat === null) {
+        els.sentimentConclusionTitle.textContent = "情绪状态：等待数据";
+        els.sentimentConclusionText.textContent = "等待 ETF 行情和均线数据载入。";
+      } else if (s.marketHeat > 75) {
+        els.sentimentConclusionTitle.textContent = "情绪状态：偏热，不追高";
+        els.sentimentConclusionText.textContent = state.strategyProfile === "long"
+          ? "市场热度只说明参与度强，不改变长期定投节奏；仍按首页的宏观与估值档位执行。"
+          : state.strategyProfile === "blend"
+            ? "市场热度只说明参与度强；战术仓不追高，核心仓仍按长期的宏观与估值档位执行。"
+            : "市场热度只说明参与度强，不等于新的反弹买点；短期与中期优先管理已有仓位。";
+      } else {
+        els.sentimentConclusionTitle.textContent = `情绪状态：${d.conditions.passed}/${d.conditions.total} 条件通过`;
+        els.sentimentConclusionText.textContent = d.text;
+      }
+    }
+
+    function renderOpportunity() {
+      const mode = state.opportunityViewMode;
+      const opportunityRows = opportunityCandidateGroups();
+      const allGroups = mode === "all" ? [] : [...new Set(opportunityRows.map((row) => taxonomyGroup(row, mode)).filter(Boolean))];
+      const groups = mode === "industry"
+        ? [...CSI_PRIMARY_INDUSTRIES.filter((group) => allGroups.includes(group)), ...allGroups.filter((group) => !CSI_PRIMARY_INDUSTRIES.includes(group)).sort((a, b) => a.localeCompare(b, "zh-CN"))]
+        : allGroups.sort((a, b) => a.localeCompare(b, "zh-CN"));
+      if (state.opportunityGroup !== "all" && !groups.includes(state.opportunityGroup)) state.opportunityGroup = "all";
+      const modeLabel = mode === "industry" ? "行业" : mode === "style" ? "宽基与风格" : mode === "theme" ? "主题" : "分类";
+      els.opportunityGroupFilter.innerHTML = `<option value="all">全部${modeLabel}</option>` + groups.map((group) => `<option value="${escapeHtml(group)}">${escapeHtml(group)}</option>`).join("");
+      els.opportunityGroupFilter.value = state.opportunityGroup;
+      els.opportunityGroupFilter.disabled = mode === "all";
+      [...els.opportunityModeSwitch.querySelectorAll("[data-opportunity-mode]")].forEach((button) => {
+        const active = button.dataset.opportunityMode === mode;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+      els.opportunityGuide.textContent = mode === "all"
+        ? `共 ${opportunityRows.length} 个去重跟踪指数机会；未筛选时前 10 个与“反弹候选 Top 10”完全一致。`
+        : mode === "industry"
+        ? "按中证一级行业筛选，表格同时显示细分行业；口径与市场估值的行业温度一致。"
+        : mode === "style"
+          ? "按宽基、成长、价值、红利等风格筛选；口径与市场估值的宽基与风格一致。"
+          : "按半导体、通信、智能制造、新能源等主题筛选；口径与市场估值的主题热度一致。";
+      renderEtfTable();
+    }
+
+    function renderEtfTable() {
+      const mode = state.opportunityViewMode;
+      let rows = opportunityCandidateGroups();
+      if (mode !== "all") rows = rows.filter((row) => taxonomyGroup(row, mode));
+      if (mode !== "all" && state.opportunityGroup !== "all") rows = rows.filter((row) => taxonomyGroup(row, mode) === state.opportunityGroup);
+      els.opportunityResultCount.textContent = `${rows.length} 个指数机会`;
+      els.etfRows.innerHTML = rows.slice(0, 220).map((row) => {
+        const cls = valuationClass(row);
+        const indexLabel = [row.indexName, row.indexId].filter(Boolean).join(" / ") || candidateGroupName(row);
+        const category = mode === "all" ? combinedTaxonomyDisplay(row) : taxonomyDisplay(row, mode);
+        return `<tr>
+          <td>${escapeHtml(category)}</td>
+          <td><span class="code">${row.exchange}.${row.code}</span></td>
+          <td class="name-cell">${escapeHtml(row.candidateGroupName || row.name)}${row.valuationProxy ? ' <span class="badge proxy">代理</span>' : ""}<small>${escapeHtml(indexLabel)}${row.candidateGroupCount > 1 ? ` / 同指数 ${row.candidateGroupCount} 只 / 组内成交 ${amount(row.candidateGroupAmount)}` : ""}</small></td>
+          <td class="num ${row.changePct < 0 ? "green" : row.changePct > 0 ? "red" : ""}">${pct(row.changePct, 2)}</td>
+          <td class="num">${formatValuation(row)}</td>
+          <td><span class="badge ${cls === "low" ? "low" : cls === "mid" ? "mid" : cls === "high" ? "high" : ""}">${escapeHtml(formatPosition(row))}</span></td>
+          <td class="num">${pct(row.ma20)}</td>
+          <td class="num">${pct(row.ma60)}</td>
+          <td class="num">${amount(row.amount)}</td>
+          <td class="num">${pct(row.turnover)}</td>
+          <td class="num">${row.candidateScore >= 0 ? row.candidateScore : "--"}</td>
+        </tr>`;
+      }).join("") || `<tr><td colspan="11" class="empty">没有符合筛选条件的 ETF。</td></tr>`;
+    }
+
+    function renderReview() {
+      const records = readRecords();
+      els.reviewRows.innerHTML = records.map((record) => `
+        <tr>
+          <td>${escapeHtml(record.date)}</td>
+          <td>${escapeHtml(record.etf)}</td>
+          <td>${escapeHtml(record.action)}</td>
+          <td>${escapeHtml(record.dca)}</td>
+          <td>${escapeHtml(record.ret)}</td>
+          <td>${escapeHtml(record.reason)}</td>
+          <td>${escapeHtml(record.review)}</td>
+        </tr>
+      `).join("") || `<tr><td colspan="7" class="empty">暂无复盘记录。</td></tr>`;
+    }
+
+    function readRecords() {
+      try { return JSON.parse(localStorage.getItem(REVIEW_KEY) || "[]"); } catch (_) { return []; }
+    }
+
+    function saveRecords(records) {
+      localStorage.setItem(REVIEW_KEY, JSON.stringify(records));
+    }
+
+    function exportFile(filename, type, content) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+
+    function reviewFilename(extension) {
+      return `investment-review-${todayIso()}.${extension}`;
+    }
+
+    function csvValue(value) {
+      return `"${String(value ?? "").replace(/"/g, '""')}"`;
+    }
+
+    function exportReviewMarkdown(records) {
+      const content = [
+        "# 投资复盘记录",
+        "",
+        `导出时间：${new Date().toLocaleString("zh-CN", { hour12: false })}`,
+        `记录数量：${records.length}`,
+        "",
+        ...records.flatMap((record, index) => [
+          `## ${index + 1}. ${record.date || "未填写日期"} | ${record.etf || "未填写 ETF"}`,
+          "",
+          `- 操作：${record.action || "--"}`,
+          `- 仓位倍数：${record.dca || "--"}`,
+          `- 持有天数：${record.days || "--"}`,
+          `- 收益率：${record.ret || "--"}`,
+          `- 买入/卖出理由：${record.reason || "--"}`,
+          `- 执行复盘：${record.review || "--"}`,
+          ""
+        ])
+      ].join("\n");
+      exportFile(reviewFilename("md"), "text/markdown;charset=utf-8", `\uFEFF${content}`);
+    }
+
+    function exportReviewCsv(records) {
+      const header = ["日期", "ETF", "操作", "仓位倍数", "持有天数", "收益率", "买入/卖出理由", "执行复盘"];
+      const rows = records.map((record) => [record.date, record.etf, record.action, record.dca, record.days, record.ret, record.reason, record.review].map(csvValue).join(","));
+      exportFile(reviewFilename("csv"), "text/csv;charset=utf-8", `\uFEFF${[header.map(csvValue).join(","), ...rows].join("\n")}`);
+    }
+
+    function normalizeImportedRecord(record) {
+      if (!record || typeof record !== "object") return null;
+      const normalized = {
+        date: String(record.date || "").trim(),
+        etf: String(record.etf || "").trim(),
+        action: String(record.action || "观察").trim(),
+        dca: String(record.dca || "1x").trim(),
+        days: String(record.days ?? "").trim(),
+        ret: String(record.ret || "").trim(),
+        reason: String(record.reason || "").trim(),
+        review: String(record.review || "").trim()
+      };
+      return normalized.date || normalized.etf || normalized.reason || normalized.review ? normalized : null;
+    }
+
+    function recordKey(record) {
+      return [record.date, record.etf, record.action, record.dca, record.days, record.ret, record.reason, record.review].join("\u0001");
+    }
+
+    function renderAll() {
+      renderOverview();
+      renderValuation();
+      renderSentiment();
+      renderOpportunity();
+      renderReview();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach((item) => item.classList.toggle("active", item === tab));
+        document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === tab.dataset.tab));
+      });
+    });
+
+    els.refreshBtn.addEventListener("click", loadData);
+    function setStrategyProfile(value) {
+      state.strategyProfile = value;
+      try { localStorage.setItem(STRATEGY_PROFILE_KEY, state.strategyProfile); } catch (_) { /* Local storage may be unavailable in private mode. */ }
+      els.strategyProfile.value = state.strategyProfile;
+      els.disciplineStrategyProfile.value = state.strategyProfile;
+      if (state.summary) {
+        renderOverview();
+        renderSentiment();
+      }
+    }
+    function setExecutionSensitivity(value) {
+      state.executionSensitivity = value;
+      try { localStorage.setItem(EXECUTION_SENSITIVITY_KEY, state.executionSensitivity); } catch (_) { /* Local storage may be unavailable in private mode. */ }
+      els.executionSensitivity.value = state.executionSensitivity;
+      els.disciplineExecutionSensitivity.value = state.executionSensitivity;
+      if (state.summary) {
+        renderOverview();
+        renderSentiment();
+      }
+    }
+    els.strategyProfile.addEventListener("change", () => setStrategyProfile(els.strategyProfile.value));
+    els.disciplineStrategyProfile.addEventListener("change", () => setStrategyProfile(els.disciplineStrategyProfile.value));
+    els.executionSensitivity.addEventListener("change", () => setExecutionSensitivity(els.executionSensitivity.value));
+    els.disciplineExecutionSensitivity.addEventListener("change", () => setExecutionSensitivity(els.disciplineExecutionSensitivity.value));
+    els.macroSensitivity.addEventListener("change", () => {
+      state.macroSensitivity = els.macroSensitivity.value;
+      try { localStorage.setItem(MACRO_SENSITIVITY_KEY, state.macroSensitivity); } catch (_) { /* Local storage may be unavailable in private mode. */ }
+      if (state.rows.length) state.summary = summarize(state.rows);
+      renderMacro();
+      if (state.summary) {
+        renderOverview();
+        renderSentiment();
+      }
+    });
+    [...els.opportunityModeSwitch.querySelectorAll("[data-opportunity-mode]")].forEach((button) => {
+      button.addEventListener("click", () => {
+        state.opportunityViewMode = button.dataset.opportunityMode;
+        state.opportunityGroup = "all";
+        renderOpportunity();
+      });
+    });
+    els.opportunityGroupFilter.addEventListener("change", () => {
+      state.opportunityGroup = els.opportunityGroupFilter.value;
+      renderEtfTable();
+    });
+    els.valuationFilter.addEventListener("change", () => {
+      state.valuation = els.valuationFilter.value;
+      renderEtfTable();
+    });
+    [...els.valuationModeSwitch.querySelectorAll("[data-valuation-mode]")].forEach((button) => {
+      button.addEventListener("click", () => {
+        const nextMode = button.dataset.valuationMode;
+        if (state.valuationViewMode === nextMode) stepBackValuation();
+        else {
+          state.valuationViewMode = nextMode;
+          state.valuationSector = "all";
+          state.valuationDetail = "all";
+        }
+        renderValuation();
+      });
+    });
+    els.valuationBackBtn.addEventListener("click", () => {
+      stepBackValuation();
+      renderValuation();
+    });
+    els.valuationSearch.addEventListener("input", () => {
+      state.valuationSearch = els.valuationSearch.value;
+      renderValuation();
+    });
+    els.valuationLevelFilter.addEventListener("change", () => {
+      state.valuationBoardLevel = els.valuationLevelFilter.value;
+      renderValuation();
+    });
+    els.candidateValuationFilter.addEventListener("change", () => {
+      state.candidateValuation = els.candidateValuationFilter.value;
+      renderOverview();
+    });
+    els.analysisDate.addEventListener("change", rerunForAnalysisDate);
+    els.latestDateBtn.addEventListener("click", () => {
+      els.analysisDate.value = todayIso();
+      rerunForAnalysisDate();
+    });
+    els.recordForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const records = readRecords();
+      records.unshift({
+        date: document.getElementById("recordDate").value || new Date().toISOString().slice(0, 10),
+        etf: document.getElementById("recordEtf").value.trim(),
+        action: document.getElementById("recordAction").value,
+        dca: document.getElementById("recordDca").value,
+        days: document.getElementById("recordDays").value,
+        ret: document.getElementById("recordReturn").value.trim(),
+        reason: document.getElementById("recordReason").value.trim(),
+        review: document.getElementById("recordReview").value.trim()
+      });
+      saveRecords(records.slice(0, 200));
+      els.recordForm.reset();
+      renderReview();
+    });
+    els.exportReviewMd.addEventListener("click", () => exportReviewMarkdown(readRecords()));
+    els.exportReviewCsv.addEventListener("click", () => exportReviewCsv(readRecords()));
+    els.exportReviewJson.addEventListener("click", () => {
+      const backup = {
+        schemaVersion: 1,
+        exportedAt: new Date().toISOString(),
+        app: "investment-decision-radar",
+        records: readRecords()
+      };
+      exportFile(reviewFilename("json"), "application/json;charset=utf-8", JSON.stringify(backup, null, 2));
+    });
+    els.importReviewJson.addEventListener("click", () => els.importReviewFile.click());
+    els.importReviewFile.addEventListener("change", async () => {
+      const file = els.importReviewFile.files?.[0];
+      if (!file) return;
+      try {
+        const parsed = JSON.parse(await file.text());
+        const incoming = Array.isArray(parsed) ? parsed : parsed?.records;
+        if (!Array.isArray(incoming)) throw new Error("未找到 records 数组");
+        const merged = [...readRecords(), ...incoming.map(normalizeImportedRecord).filter(Boolean)];
+        const unique = [...new Map(merged.map((record) => [recordKey(record), record])).values()]
+          .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+          .slice(0, 200);
+        saveRecords(unique);
+        renderReview();
+        alert(`已导入 ${incoming.length} 条记录；合并去重后共 ${unique.length} 条。`);
+      } catch (error) {
+        alert(`导入失败：${error.message || "文件不是有效的复盘 JSON"}`);
+      } finally {
+        els.importReviewFile.value = "";
+      }
+    });
+
+    els.analysisDate.max = todayIso();
+    els.analysisDate.value = state.analysisDate;
+    document.getElementById("recordDate").value = todayIso();
+    loadData();
+  </script>
+</body>
+</html>

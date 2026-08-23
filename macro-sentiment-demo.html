@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>宏观与市场情绪 | 决策结构演示</title>
+  <style>
+    :root { --bg:#f4f7fb; --surface:#fff; --soft:#f7fafc; --ink:#172033; --muted:#687385; --line:#dfe6ef; --blue:#2563eb; --green:#159455; --yellow:#b78200; --red:#c2413a; --radius:8px; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+    .shell { width:min(1320px,100%); margin:0 auto; padding:18px; }
+    .top { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin-bottom:14px; }
+    h1 { margin:0; font-size:30px; line-height:1.15; }
+    h2 { margin:0; font-size:20px; }
+    h3 { margin:0; font-size:15px; }
+    p { margin:0; }
+    .intro,.sub,.footnote { color:var(--muted); font-size:13px; line-height:1.55; }
+    .intro { margin-top:7px; max-width:760px; }
+    .chip { display:inline-flex; align-items:center; min-height:28px; padding:3px 9px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); color:var(--muted); font-size:12px; font-weight:700; white-space:nowrap; }
+    .chip.demo { color:var(--blue); border-color:#bcd0ff; background:#eff5ff; }
+    .tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-bottom:14px; }
+    .tab { min-height:42px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); color:var(--muted); font-weight:700; cursor:pointer; }
+    .tab.active { border-color:var(--blue); background:var(--blue); color:#fff; }
+    .view { display:none; }
+    .view.active { display:block; }
+    .panel { overflow:hidden; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); box-shadow:0 8px 20px rgba(31,45,61,.06); margin-bottom:14px; }
+    .panel-head { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; padding:15px 16px 12px; border-bottom:1px solid var(--line); }
+    .panel-body { padding:14px 16px 16px; }
+    .grid-4 { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .metric { min-height:126px; padding:12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--soft); }
+    .metric .label { color:var(--muted); font-size:12px; }
+    .metric .value { margin-top:9px; font-size:25px; font-weight:760; font-variant-numeric:tabular-nums; }
+    .metric .sub { margin-top:8px; }
+    .metric.wait { background:#fbfcfe; }
+    .metric.good { border-color:#a9dcc1; background:#f0fbf5; }
+    .metric.warn { border-color:#e9d396; background:#fffbed; }
+    .metric.risk { border-color:#e5b3ae; background:#fff5f3; }
+    .divider { display:flex; align-items:center; gap:10px; margin:16px 0 10px; color:var(--muted); font-size:12px; font-weight:700; }
+    .divider::after { content:""; height:1px; flex:1; background:var(--line); }
+    .decision { display:grid; grid-template-columns:170px minmax(0,1fr); gap:14px; align-items:stretch; }
+    .status { display:grid; align-content:center; gap:7px; padding:14px; border:1px solid #e9d396; border-radius:var(--radius); background:#fffbed; }
+    .status strong { font-size:22px; color:var(--yellow); }
+    .steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+    .step { position:relative; min-height:110px; padding:11px; border:1px solid var(--line); border-radius:var(--radius); background:var(--soft); }
+    .step b { display:block; color:var(--blue); font-size:12px; }
+    .step span { display:block; margin-top:7px; color:var(--muted); font-size:12px; line-height:1.45; }
+    .step.active { border-color:#e9d396; background:#fffbed; }
+    .step.active b { color:var(--yellow); }
+    .alert-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .alert { min-height:118px; padding:12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--soft); }
+    .alert b { display:block; font-size:13px; }
+    .alert .reading { margin-top:9px; font-size:21px; font-weight:750; }
+    .alert p { margin-top:7px; color:var(--muted); font-size:12px; line-height:1.45; }
+    .rule { padding:12px; border-left:4px solid var(--blue); background:#f6f9ff; color:var(--muted); font-size:13px; line-height:1.6; }
+    .rule strong { color:var(--ink); }
+    .footnote { padding:2px 2px 18px; }
+    @media (max-width:900px) { .grid-4,.grid-3,.alert-grid,.steps { grid-template-columns:repeat(2,minmax(0,1fr)); } .decision { grid-template-columns:1fr; } }
+    @media (max-width:620px) { .shell { padding:12px; } .top,.panel-head { flex-direction:column; } h1 { font-size:25px; } .grid-4,.grid-3,.alert-grid,.steps { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div>
+        <h1>宏观与市场情绪</h1>
+        <p class="intro">独立查看中期环境和短期资金、情绪状态；两页各自给出可执行的风险提示。</p>
+      </div>
+      <span class="chip demo">结构演示，不构成投资建议</span>
+    </header>
+
+    <nav class="tabs" aria-label="演示页面">
+      <button class="tab active" type="button" data-view="macro">宏观环境</button>
+      <button class="tab" type="button" data-view="sentiment">市场情绪</button>
+    </nav>
+
+    <section class="view active" id="macro">
+    <section class="panel">
+      <div class="panel-head"><div><h2>宏观环境</h2><p class="sub">以日/周趋势观察外部折现压力、汇率和国内资金期限结构，判断整体风险环境。</p></div><span class="chip">中期趋势</span></div>
+      <div class="panel-body">
+        <div class="grid-4">
+          <article class="metric wait"><div class="label">美国实际利率 / 10Y</div><div class="value">待接入</div><div class="sub">观察折现压力的 20/60 日方向。</div></article>
+          <article class="metric wait"><div class="label">USD/CNY</div><div class="value">待接入</div><div class="sub">看趋势和异常分位，不看单日噪声。</div></article>
+          <article class="metric wait"><div class="label">SHIBOR 3M / 1Y</div><div class="value">待接入</div><div class="sub">观察资金期限结构，不等同实体融资成本。</div></article>
+          <article class="metric wait"><div class="label">股债估值差</div><div class="value">待接入</div><div class="sub">股息率差与盈利收益率差分开显示。</div></article>
+        </div>
+        <div class="divider">宏观状态</div>
+        <div class="decision">
+          <div class="status"><span class="sub">当前示例状态</span><strong>中性</strong><span class="sub">风险敞口：维持基准</span></div>
+          <div class="steps">
+            <div class="step"><b>1. 改善</b><span>实际利率、美元与资金面同步改善，风险环境转暖。</span></div>
+            <div class="step active"><b>2. 中性</b><span>信号分化或趋势未确认，维持基准节奏。</span></div>
+            <div class="step"><b>3. 收紧</b><span>外部折现压力与国内资金面同时转差，降低风险偏好。</span></div>
+            <div class="step"><b>4. 趋势复核</b><span>日更数据用 20/60 日方向确认，避免单日消息改变判断。</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <p class="footnote">建议接入顺序：美国实际利率、美元指数、USD/CNY、SHIBOR 3M/1Y、10 年国债与股债估值差；每项显示来源、时间戳和历史位置。</p>
+    </section>
+
+    <section class="view" id="sentiment">
+    <section class="panel">
+      <div class="panel-head"><div><h2>市场情绪</h2><p class="sub">短期流动性、汇率压力、超跌程度与 ETF 交易活跃度共同观察，面向 1–14 天反弹机会。</p></div><span class="chip">短期流动性</span></div>
+      <div class="panel-body">
+        <div class="alert-grid">
+          <article class="alert wait"><b>DR007 / FR007 异常</b><div class="reading">待接入</div><p>用 1 年分位或 Z-score 识别异常，不把月末冲高直接当买点。</p></article>
+          <article class="alert wait"><b>USD/CNH - USD/CNY</b><div class="reading">待接入</div><p>固定报价方向后看异常扩张；作为外部压力警报，不独立交易。</p></article>
+          <article class="alert warn"><b>ETF 超跌与流动性</b><div class="reading">确认中</div><p>估值不高、20/60 日偏离、换手和成交额共同确认。</p></article>
+        </div>
+        <div class="divider">四步执行闸门</div>
+        <div class="steps">
+          <div class="step"><b>条件 A：宏观未明显收紧</b><span>宏观环境转为收紧时，短期信号只观察，不提高风险暴露。</span></div>
+          <div class="step"><b>条件 B：估值不过热</b><span>行业/指数历史位置不在高估区，或有明确估值豁免理由。</span></div>
+          <div class="step"><b>条件 C：压力停止恶化</b><span>短端资金利率回落或稳定，汇差不再继续扩大。</span></div>
+          <div class="step active"><b>条件 D：价格确认</b><span>ETF 超跌后止跌，成交可执行，才进入 0.5x 试探仓。</span></div>
+        </div>
+        <div class="divider">动作输出</div>
+        <div class="grid-3">
+          <article class="metric"><div class="label">观察</div><div class="value">0x</div><div class="sub">战略防守、资金压力恶化或价格未止跌。</div></article>
+          <article class="metric warn"><div class="label">试探</div><div class="value">0.5x</div><div class="sub">四项中前三项满足，等待价格确认或只做首笔。</div></article>
+          <article class="metric good"><div class="label">分批</div><div class="value">1x–1.5x</div><div class="sub">四项确认后分批进入；预先写好退出与最长持有日。</div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="rule"><strong>核心纪律：</strong>DR007、CNH-CNY 等短期指标用于识别“是否等待确认”，不把单一利率或汇率异动解释为天然抄底信号。只有估值、超跌、资金压力稳定和价格确认同时满足时，才考虑分批执行。</section>
+    <p class="footnote">建议接入顺序：DR007/FR007、USD/CNH、市场上涨家数、ETF 换手率与均线偏离；每项显示来源、时间戳、历史分位和异常阈值。</p>
+    </section>
+  </main>
+  <script>
+    document.querySelectorAll('.tab').forEach((tab) => tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach((item) => item.classList.toggle('active', item === tab));
+      document.querySelectorAll('.view').forEach((view) => view.classList.toggle('active', view.id === tab.dataset.view));
+    }));
+  </script>
+</body>
+</html>

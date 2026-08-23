@@ -1,0 +1,13 @@
+{
+  "name": "investment-decision-radar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ETF valuation, sentiment and decision dashboard.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
