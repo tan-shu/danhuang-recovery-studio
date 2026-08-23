@@ -1,0 +1,9 @@
+.service-scope-note {
+  margin: 0;
+  padding: 13px 17px 18px;
+  color: #6b7d82;
+  background: #f5fbfc;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  line-height: 1.65;
+}

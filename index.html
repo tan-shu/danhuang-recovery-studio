@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f5fbfc" />
-    <title>蛋黄康复工作室 | 预约与治疗管理</title>
+    <title>蛋黄康复工作室 | 预约与运动康复管理</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="./auth.css" />
     <link rel="stylesheet" href="./plan.css" />
     <link rel="stylesheet" href="./admin.css" />
+    <link rel="stylesheet" href="./compliance.css" />
   </head>
   <body>
     <div class="app-shell">
@@ -24,7 +25,7 @@
         </button>
         <div class="topbar-actions">
           <span class="clinic-tag"><i class="icon icon-map-pin"></i> <span id="clinic-name">滨江康复中心</span></span>
-          <button class="icon-button" data-action="open-workspace" title="治疗师工作台" aria-label="治疗师工作台"><i class="icon icon-layout-dashboard"></i></button>
+          <button class="icon-button" data-action="open-workspace" title="康复师工作台" aria-label="康复师工作台"><i class="icon icon-layout-dashboard"></i></button>
           <button id="auth-avatar" class="avatar" data-action="auth-entry" aria-label="登录或打开个人中心">微</button>
         </div>
       </header>
@@ -32,13 +33,13 @@
       <main>
         <section id="home-view" class="view active">
           <div class="hero">
-            <img src="./public/assets/rehab-consultation-hero.png" alt="康复治疗师为客户进行姿态评估" />
+            <img src="./public/assets/rehab-consultation-hero.png" alt="康复师为客户进行功能评估" />
             <div class="hero-scrim"></div>
             <div class="hero-copy">
               <span class="eyebrow">SPINE RECOVERY STUDIO</span>
               <h1 id="hero-title">从一次评估，<br />开始有节奏的康复。</h1>
               <p id="hero-subtitle">专业评估、到店预约与居家训练，会根据每次反馈灵活调整。</p>
-              <button class="text-link" data-action="open-booking">预约本次治疗 <i class="icon icon-arrow-up-right"></i></button>
+              <button class="text-link" data-action="open-booking">预约本次训练 <i class="icon icon-arrow-up-right"></i></button>
             </div>
           </div>
 
@@ -54,13 +55,13 @@
               <div class="empty-icon"><i class="icon icon-calendar-plus"></i></div>
               <div>
                 <h3>给身体留出一小时</h3>
-                <p>预约后将显示门店、治疗师、时段与治疗项目。</p>
+                <p>预约后将显示门店、康复师、时段与服务项目。</p>
               </div>
             </div>
             <div id="arrival-booked" class="arrival-content booked-state hidden">
               <div class="time-block"><span id="appointment-time">16:30</span><small>今天</small></div>
               <div class="appointment-info">
-                <strong id="appointment-service">肩颈评估与治疗</strong>
+                <strong id="appointment-service">肩颈功能评估</strong>
                 <span id="appointment-details">李老师 · 滨江康复中心</span>
               </div>
               <button class="icon-button subtle" data-action="cancel-booking" title="取消预约" aria-label="取消预约"><i class="icon icon-x"></i></button>
@@ -97,7 +98,7 @@
           <section class="metrics section-pad">
             <article>
               <span class="metric-icon aqua"><i class="icon icon-layers-2"></i></span>
-              <small>剩余治疗次数</small>
+              <small>剩余服务次数</small>
               <strong><span id="remaining-count">8</span><em>次</em></strong>
               <button data-action="show-plan">查看明细 <i class="icon icon-chevron-right"></i></button>
             </article>
@@ -119,6 +120,7 @@
             </div>
             <div class="therapist-list" id="therapist-list"></div>
           </section>
+          <p class="service-scope-note">本工作室服务范围为功能评估、运动康复训练与运动表现恢复，不替代医疗机构提供疾病诊断、治疗或处方服务；如有明显不适，请及时咨询合格医疗机构。</p>
         </section>
 
         <section id="booking-view" class="view booking-view">
@@ -128,7 +130,7 @@
           </div>
           <div class="booking-panel">
             <div class="booking-group">
-              <label>选择治疗项目</label>
+              <label>选择服务项目</label>
               <div id="service-options" class="choice-stack"></div>
             </div>
             <div class="booking-group">
@@ -174,7 +176,7 @@
             <button data-action="open-auth"><i class="icon icon-shield-check"></i><span>账户与登录</span><em id="auth-state-label">微信登录</em><i class="icon icon-chevron-right"></i></button>
             <button data-action="show-records"><i class="icon icon-notebook-tabs"></i><span>康复记录</span><i class="icon icon-chevron-right"></i></button>
             <button data-action="show-appointments"><i class="icon icon-calendar-days"></i><span>我的预约</span><i class="icon icon-chevron-right"></i></button>
-            <button data-action="open-workspace"><i class="icon icon-layout-dashboard"></i><span>治疗师工作台</span><i class="icon icon-chevron-right"></i></button>
+            <button data-action="open-workspace"><i class="icon icon-layout-dashboard"></i><span>康复师工作台</span><i class="icon icon-chevron-right"></i></button>
           </div>
         </section>
 
