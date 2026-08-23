@@ -1,0 +1,43 @@
+.arrangement-page-head { align-items: center; }
+.arrangement-status { display: inline-flex; align-items: center; min-height: 30px; padding: 0 10px; color: #8a671f; background: #fff3d6; border-radius: 9px; font-size: 11px; font-weight: 700; }
+.arrangement-intro { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 12px; padding: 18px 20px; color: #fff; background: #177f96; }
+.arrangement-intro > span { width: 40px; height: 40px; display: grid; place-items: center; background: rgba(255,255,255,.16); border-radius: 10px; font-size: 19px; }
+.arrangement-intro h2 { margin: 0 0 5px; font-size: 17px; }
+.arrangement-intro small { display: block; margin-bottom: 5px; color: #d4f2ef; font-size: 10px; font-weight: 700; }
+.arrangement-intro p { margin: 0; color: rgba(255,255,255,.82); font-size: 11px; line-height: 1.65; }
+.arrangement-section { padding: 22px 17px; background: #fff; border-bottom: 1px solid var(--line); }
+.arrangement-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+.arrangement-section-head h2 { margin: 4px 0 0; font-size: 19px; }
+.arrangement-appointment { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 14px; background: #f2f9f9; border-radius: 8px; }
+.arrangement-appointment-date { display: grid; place-items: center; min-height: 52px; color: #147f91; background: #fff; border-radius: 8px; }
+.arrangement-appointment-date strong { font-size: 18px; }
+.arrangement-appointment-date small { font-size: 9px; }
+.arrangement-appointment > div:nth-child(2) strong { display: block; font-size: 13px; }
+.arrangement-appointment > div:nth-child(2) small { display: block; margin-top: 4px; color: #6a858b; font-size: 10px; line-height: 1.45; }
+.arrangement-appointment .state-pill { padding: 6px 8px; font-size: 10px; }
+.arrangement-empty { display: flex; align-items: center; gap: 11px; padding: 15px; color: #607d84; background: #f4f8f8; border-radius: 8px; font-size: 12px; }
+.arrangement-empty i { width: 35px; height: 35px; display: grid; place-items: center; flex: 0 0 auto; color: #1398a5; background: #e0f4f4; border-radius: 9px; font-size: 17px; }
+.arrangement-empty button { margin-left: auto; color: #098da6; background: transparent; font-size: 11px; font-weight: 700; }
+.home-training-section { display: grid; gap: 8px; }
+.home-training-section .arrangement-section-head { margin-bottom: 5px; }
+.training-schedule-row { width: 100%; min-height: 65px; display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 0; background: transparent; border-bottom: 1px solid #edf3f4; text-align: left; }
+.training-schedule-row:last-child { border-bottom: 0; }
+.training-schedule-icon { width: 36px; height: 36px; display: grid; place-items: center; color: #fff; background: #18a99e; border-radius: 9px; font-size: 16px; }
+.training-schedule-icon.secondary { background: #3f9dd2; }
+.training-schedule-row strong { display: block; font-size: 13px; }
+.training-schedule-row small { display: block; margin-top: 4px; color: #71898f; font-size: 10px; }
+.training-schedule-row > .icon-chevron-right { color: #9db0b4; font-size: 17px; }
+.training-state { min-width: 46px; padding: 5px 7px; color: #9b721d; background: #fff3d8; border-radius: 99px; font-size: 9px; font-weight: 700; text-align: center; }
+.training-state.done { color: #16866f; background: #dff5ec; }
+.service-usage-band { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: end; padding: 22px 17px 28px; background: #edf7f7; }
+.service-usage-band h2 { margin: 4px 0 5px; font-size: 17px; }
+.service-usage-band p { margin: 0; color: #667f85; font-size: 10px; line-height: 1.55; }
+.service-usage-numbers { display: grid; justify-items: end; gap: 5px; color: #648087; font-size: 9px; white-space: nowrap; }
+.service-usage-numbers strong { color: #118e9b; font-size: 21px; }
+.service-usage-numbers strong small { font-size: 10px; }
+.service-usage-numbers b { color: #315e66; }
+
+@media (max-width: 360px) {
+  .service-usage-band { grid-template-columns: 1fr; }
+  .service-usage-numbers { justify-items: start; }
+}

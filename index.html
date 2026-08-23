@@ -10,6 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/lucide-static@0.468.0/font/lucide.css" />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./workspace.css" />
+    <link rel="stylesheet" href="./auth.css" />
+    <link rel="stylesheet" href="./plan.css" />
+    <link rel="stylesheet" href="./admin.css" />
   </head>
   <body>
     <div class="app-shell">
@@ -21,7 +25,7 @@
         <div class="topbar-actions">
           <span class="clinic-tag"><i class="icon icon-map-pin"></i> <span id="clinic-name">滨江康复中心</span></span>
           <button class="icon-button" data-action="open-workspace" title="治疗师工作台" aria-label="治疗师工作台"><i class="icon icon-layout-dashboard"></i></button>
-          <button class="avatar" data-action="profile" aria-label="打开个人中心">林</button>
+          <button id="auth-avatar" class="avatar" data-action="auth-entry" aria-label="登录或打开个人中心">微</button>
         </div>
       </header>
 
@@ -33,7 +37,7 @@
             <div class="hero-copy">
               <span class="eyebrow">SPINE RECOVERY STUDIO</span>
               <h1 id="hero-title">从一次评估，<br />开始有节奏的康复。</h1>
-              <p id="hero-subtitle">专业评估、到店治疗与居家训练，都在同一份康复计划里。</p>
+              <p id="hero-subtitle">专业评估、到店预约与居家训练，会根据每次反馈灵活调整。</p>
               <button class="text-link" data-action="open-booking">预约本次治疗 <i class="icon icon-arrow-up-right"></i></button>
             </div>
           </div>
@@ -42,7 +46,7 @@
             <div class="section-heading inline-heading">
               <div>
                 <span class="section-kicker">TODAY'S VISIT</span>
-                <h2>今日到店计划</h2>
+                <h2>今日到店安排</h2>
               </div>
               <span id="appointment-state" class="state-pill pending">尚未预约</span>
             </div>
@@ -79,9 +83,9 @@
               <small>记录身体起点</small>
             </button>
             <button class="quick-item" data-action="show-plan">
-              <span class="quick-icon amber"><i class="icon icon-credit-card"></i></span>
-              <strong>治疗计划</strong>
-              <small>次数与权益</small>
+              <span class="quick-icon amber"><i class="icon icon-list-checks"></i></span>
+              <strong>康复安排</strong>
+              <small>预约与训练</small>
             </button>
             <button class="quick-item" data-action="show-training">
               <span class="quick-icon mint"><i class="icon icon-play"></i></span>
@@ -144,25 +148,30 @@
         </section>
 
         <section id="plan-view" class="view simple-view">
-          <div class="page-head"><div><span class="section-kicker">CARE PROGRAM</span><h1>我的治疗计划</h1></div></div>
-          <div class="program-card">
-            <div class="program-top"><span id="plan-name">脊柱功能康复计划</span><span class="state-pill active">进行中</span></div>
-            <h2 id="plan-stage">第 2 阶段 · 稳定与强化</h2>
-            <p>本周目标：完成 2 次到店治疗，及 3 次 12 分钟居家练习。</p>
-            <div class="progress"><span></span></div>
-            <div class="program-numbers"><strong><span id="plan-done">4</span><small> / <span id="plan-total">12</span> 次已完成</small></strong><span>有效期至 <span id="plan-expiry">2026.10.30</span></span></div>
-          </div>
-          <div class="plan-list">
-            <div><i class="icon icon-circle-check"></i><span>初始姿态与活动度评估</span><small>已完成</small></div>
-            <div><i class="icon icon-circle-check"></i><span>疼痛控制与软组织放松</span><small>已完成</small></div>
-            <div><i class="icon icon-circle-dot"></i><span>核心稳定与动作重建</span><small>进行中</small></div>
-            <div><i class="icon icon-circle"></i><span>功能回归与复测</span><small>未开始</small></div>
-          </div>
+          <div class="page-head arrangement-page-head"><div><span class="section-kicker">REHAB ARRANGEMENT</span><h1>我的康复安排</h1></div><span class="arrangement-status">动态调整</span></div>
+          <section class="arrangement-intro">
+            <span><i class="icon icon-refresh-cw"></i></span>
+            <div><h2 id="plan-name">近期康复安排</h2><small id="plan-focus">近期关注 · 胸椎活动与稳定训练</small><p>预约和训练会根据每次反馈调整，不代表固定恢复进度或恢复时限。</p></div>
+          </section>
+          <section class="arrangement-section">
+            <div class="arrangement-section-head"><div><span class="section-kicker">APPOINTMENTS</span><h2>预约安排</h2></div><button class="text-button" data-action="show-appointments">全部预约 <i class="icon icon-arrow-up-right"></i></button></div>
+            <div id="plan-appointment"></div>
+          </section>
+          <section class="arrangement-section home-training-section">
+            <div class="arrangement-section-head"><div><span class="section-kicker">HOME TRAINING</span><h2>居家训练</h2></div><button class="text-button" data-action="show-training">查看动作 <i class="icon icon-arrow-up-right"></i></button></div>
+            <button class="training-schedule-row" data-action="show-training"><span class="training-schedule-icon"><i class="icon icon-play"></i></span><div><strong>胸椎伸展与呼吸</strong><small>约 12 分钟 · 2 组 × 8 次</small></div><span id="training-state" class="training-state">待完成</span></button>
+            <button class="training-schedule-row" data-action="show-training"><span class="training-schedule-icon secondary"><i class="icon icon-activity"></i></span><div><strong>颈深屈肌激活</strong><small>约 8 分钟 · 3 组 × 10 次</small></div><i class="icon icon-chevron-right"></i></button>
+          </section>
+          <section class="service-usage-band">
+            <div><span class="section-kicker">SERVICE USAGE</span><h2>到店服务次数</h2><p>次数仅记录服务使用情况，不表示恢复完成度。</p></div>
+            <div class="service-usage-numbers"><strong><span id="plan-done">4</span><small> 次已到店</small></strong><span>剩余 <b id="plan-remaining">8</b> 次 · 有效期至 <span id="plan-expiry">2026.10.30</span></span><span id="plan-total" class="hidden">12</span></div>
+          </section>
         </section>
 
         <section id="profile-view" class="view simple-view">
-          <div class="profile-card"><span id="customer-initial" class="large-avatar">林</span><div><h1 id="customer-name">林然</h1><p>已建立康复档案 · 2026.07.20</p></div><button class="icon-button subtle" data-action="open-assessment" title="编辑档案" aria-label="编辑档案"><i class="icon icon-pencil"></i></button></div>
+          <div class="profile-card"><span id="customer-initial" class="large-avatar">林</span><div><h1 id="customer-name">林然</h1><p id="account-meta">已建立康复档案 · 2026.07.20</p></div><button class="icon-button subtle" data-action="open-assessment" title="编辑档案" aria-label="编辑档案"><i class="icon icon-pencil"></i></button></div>
           <div class="profile-menu">
+            <button data-action="open-auth"><i class="icon icon-shield-check"></i><span>账户与登录</span><em id="auth-state-label">微信登录</em><i class="icon icon-chevron-right"></i></button>
             <button data-action="show-records"><i class="icon icon-notebook-tabs"></i><span>康复记录</span><i class="icon icon-chevron-right"></i></button>
             <button data-action="show-appointments"><i class="icon icon-calendar-days"></i><span>我的预约</span><i class="icon icon-chevron-right"></i></button>
             <button data-action="open-workspace"><i class="icon icon-layout-dashboard"></i><span>治疗师工作台</span><i class="icon icon-chevron-right"></i></button>
@@ -181,7 +190,7 @@
       <nav class="bottom-nav" aria-label="主导航">
         <button class="nav-item active" data-action="home"><i class="icon icon-house"></i><span>首页</span></button>
         <button class="nav-item" data-action="open-booking"><i class="icon icon-calendar-days"></i><span>预约</span></button>
-        <button class="nav-item" data-action="show-plan"><i class="icon icon-notebook-tabs"></i><span>计划</span></button>
+        <button class="nav-item" data-action="show-plan"><i class="icon icon-list-checks"></i><span>安排</span></button>
         <button class="nav-item" data-action="profile"><i class="icon icon-user-round"></i><span>我的</span></button>
       </nav>
     </div>

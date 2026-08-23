@@ -1,0 +1,86 @@
+.workspace-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.workspace-heading h3 { margin: 4px 0 0; font-size: 17px; }
+.workspace-date { display: inline-flex; align-items: center; gap: 5px; padding: 7px 9px; border-radius: 9px; color: #198f9d; background: #e9f8f8; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.workspace-tabs { display: flex; gap: 7px; padding-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
+.workspace-tabs::-webkit-scrollbar { display: none; }
+.workspace-tab { flex: 0 0 auto; min-width: 58px; padding: 8px 11px; color: #6b858b; background: #f2f7f7; border: 1px solid transparent; border-radius: 9px; font-size: 12px; font-weight: 700; }
+.workspace-tab.active { color: #fff; background: #139cab; border-color: #139cab; }
+.workspace-role-note { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; color: #318088; background: #edf8f8; border-radius: 9px; font-size: 11px; font-weight: 700; }
+.workspace-role-note .icon { color: #129cab; font-size: 14px; }
+.workspace-hint { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; color: #71888e; font-size: 11px; }
+.workspace-hint .icon { color: #10a6ad; font-size: 15px; }
+.workspace-table { gap: 7px; }
+.workspace-row { width: 100%; grid-template-columns: 44px 34px minmax(0, 1fr) auto; padding: 10px 7px; background: transparent; text-align: left; transition: background .18s, transform .18s; }
+.workspace-row:hover { background: #f3fbfb; border-radius: 11px; }
+.workspace-row:focus-visible { outline: 2px solid #11a8ae; outline-offset: 2px; border-radius: 11px; }
+.workspace-avatar { width: 31px; height: 31px; display: grid; place-items: center; color: #167e94; background: #dff4f5; border-radius: 9px; font-size: 12px; font-weight: 800; }
+.workspace-row span.workspace-status { min-width: 48px; padding: 5px 6px; text-align: center; color: #198e80; background: #e3f7ef; border-radius: 99px; font-size: 10px; font-weight: 700; }
+.workspace-row .workspace-status.pending { color: #9d7114; background: #fff4d8; }
+.workspace-row .workspace-status.upcoming { color: #147f9a; background: #e3f6fb; }
+.workspace-row .workspace-status.active { color: #7558a6; background: #f0eaff; }
+.workspace-empty { padding: 24px 12px; text-align: center; color: #869ba0; background: #f8fbfb; border-radius: 12px; font-size: 12px; }
+
+.patient-detail { display: grid; gap: 15px; }
+.patient-detail-head { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.patient-detail-avatar { width: 52px; height: 52px; display: grid; place-items: center; color: #fff; border-radius: 15px; font-size: 20px; font-weight: 800; }
+.patient-detail-head h3 { margin: 4px 0; font-size: 19px; }
+.patient-detail-head p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.patient-focus, .patient-next { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; padding: 13px; background: #f4fbfb; border-radius: 13px; }
+.patient-focus > span, .patient-next > i { width: 30px; height: 30px; display: grid; place-items: center; color: #0b98a4; background: #dff5f4; border-radius: 9px; font-size: 16px; }
+.patient-focus small, .patient-next small, .patient-progress-card small { color: #70898f; font-size: 11px; font-weight: 700; }
+.patient-focus p, .patient-next p { margin: 4px 0 0; color: #365b63; font-size: 12px; line-height: 1.6; }
+.patient-concerns { display: grid; gap: 8px; }
+.concern-add-button { display: inline-flex; align-items: center; gap: 4px; padding: 7px 9px; color: #138f9b; background: #e9f7f7; border-radius: 8px; font-size: 10px; font-weight: 700; }
+.concern-list { display: grid; gap: 8px; }
+.concern-card { padding: 13px; border: 1px solid #dceced; border-left: 3px solid #16a4aa; background: #fbfefe; border-radius: 8px; }
+.concern-card.home { border-left-color: #289ed0; }
+.concern-card.monitoring { border-left-color: #d69b2c; }
+.concern-card.improved { border-left-color: #53a477; }
+.concern-card.closed { border-left-color: #9ba9ac; background: #f6f8f8; }
+.concern-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 9px; }
+.concern-card-head h4 { margin: 4px 0 0; font-size: 13px; }
+.concern-priority { color: #718a90; font-size: 9px; font-weight: 800; }
+.concern-priority.primary { color: #118f9c; }
+.concern-priority.historical { color: #8d9c9f; }
+.concern-status { flex: 0 0 auto; padding: 5px 7px; color: #148d96; background: #def4f4; border-radius: 99px; font-size: 9px; font-weight: 700; }
+.concern-status.home { color: #247da4; background: #e2f2fa; }
+.concern-status.monitoring { color: #936b1d; background: #fff1cf; }
+.concern-status.improved { color: #347b59; background: #e1f2e8; }
+.concern-status.closed { color: #718084; background: #e8eded; }
+.concern-card > p { margin: 8px 0; color: #58757c; font-size: 11px; line-height: 1.6; }
+.concern-close-reason { display: flex; align-items: center; gap: 5px; color: #73878b !important; }
+.concern-outcome { margin: 7px 0; padding: 9px; color: #60797f; background: #fff; border: 1px solid #e3ecec; border-radius: 7px; }
+.concern-outcome strong { display: block; color: #3d6168; font-size: 9px; }
+.concern-outcome p { margin: 4px 0 0; font-size: 10px; line-height: 1.55; }
+.concern-last-event { display: block; margin: 3px 0 8px; color: #829499; font-size: 9px; }
+.concern-card-actions { display: flex; align-items: center; justify-content: flex-end; gap: 7px; padding-top: 9px; border-top: 1px solid #e7f0f0; }
+.concern-icon-button { width: 31px; height: 31px; display: grid; place-items: center; color: #b27d18; background: #fff4d7; border-radius: 8px; font-size: 14px; }
+.concern-card-actions label { display: flex; align-items: center; gap: 6px; color: #71888e; font-size: 9px; font-weight: 700; }
+.concern-status-select { min-height: 31px; padding: 0 25px 0 8px; color: #345e66; background: #fff; border: 1px solid #d8e8e9; border-radius: 8px; outline: none; font: inherit; font-size: 10px; font-weight: 700; }
+.concern-status-select:focus { border-color: #16a5a8; }
+.patient-progress-card { padding: 15px; color: #f9ffff; background: linear-gradient(135deg, #147e98, #24b89f); border-radius: 15px; }
+.patient-progress-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.patient-progress-head small { color: rgba(255,255,255,.78); }
+.patient-progress-head h4 { margin: 4px 0 0; font-size: 15px; }
+.patient-progress-head > strong { font-size: 23px; line-height: 1; }
+.patient-progress-head > strong small { color: rgba(255,255,255,.85); font-size: 11px; font-weight: 500; }
+.patient-progress-track { height: 7px; overflow: hidden; margin: 16px 0 12px; background: rgba(255,255,255,.3); border-radius: 99px; }
+.patient-progress-track span { display: block; height: 100%; background: #fff; border-radius: inherit; }
+.patient-progress-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 15px; }
+.patient-progress-metrics span { color: rgba(255,255,255,.76); font-size: 10px; }
+.patient-progress-metrics b { display: inline-block; margin-left: 2px; color: #fff; font-size: 15px; }
+.patient-progress-metrics small { color: rgba(255,255,255,.76); font-size: 9px; }
+.patient-history { display: grid; gap: 0; }
+.patient-section-title { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 7px; }
+.patient-section-title h4 { margin: 3px 0 0; font-size: 15px; }
+.patient-section-title > span { color: #7d969c; font-size: 11px; }
+.patient-history-item { position: relative; display: grid; grid-template-columns: 75px minmax(0, 1fr); gap: 9px; padding: 12px 0 12px 10px; border-left: 2px solid #d9eeef; }
+.patient-history-item::before { position: absolute; top: 16px; left: -5px; width: 8px; height: 8px; content: ''; background: #16a5a8; border: 2px solid #fff; border-radius: 50%; }
+.patient-history-item time { color: #1496a1; font-size: 10px; font-weight: 800; }
+.patient-history-item h4 { margin: 0 0 4px; font-size: 12px; }
+.patient-history-item p { margin: 0; color: #607d84; font-size: 11px; line-height: 1.58; }
+
+@media (min-width: 720px) {
+  .workspace-tabs { flex-wrap: wrap; overflow: visible; }
+  .workspace-row { padding-left: 10px; padding-right: 10px; }
+}
