@@ -21,4 +21,4 @@ await mkdir(join(dist, 'server'), { recursive: true });
 await Promise.all(staticFiles.map((file) => cp(join(root, file), join(dist, file))));
 await cp(join(root, 'public'), join(dist, 'public'), { recursive: true });
 
-await writeFile(join(dist, 'server', 'index.js'), `export default {\n  async fetch(request, env) {\n    if (env.ASSETS?.fetch) return env.ASSETS.fetch(request);\n    return new Response('Static assets binding is unavailable.', { status: 503 });\n  },\n};\n`);
+await writeFile(join(dist, 'server', 'index.js'), `export default {\n  async fetch(request, env) {\n    if (!env.ASSETS?.fetch) {\n      return new Response('Static assets binding is unavailable.', { status: 503 });\n    }\n\n    const assetUrl = new URL(request.url);\n    if (assetUrl.pathname === '/') assetUrl.pathname = '/index.html';\n\n    const response = await env.ASSETS.fetch(new Request(assetUrl, request));\n    if (response.status !== 404 || request.method !== 'GET') return response;\n\n    assetUrl.pathname = '/index.html';\n    return env.ASSETS.fetch(new Request(assetUrl, request));\n  },\n};\n`);
