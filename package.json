@@ -3,6 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node build.mjs"
+    "dev:h5": "npm --prefix uniapp run dev:h5",
+    "build": "npm --prefix uniapp run build:h5 && node build.mjs",
+    "build:h5": "npm --prefix uniapp run build:h5",
+    "build:mp-weixin": "npm --prefix uniapp run build:mp-weixin"
   }
 }

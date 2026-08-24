@@ -1,0 +1,23 @@
+{
+  "name": "蛋黄康复工作室",
+  "appid": "",
+  "description": "预约、功能评估与运动康复训练管理演示",
+  "versionName": "0.2.0",
+  "versionCode": "200",
+  "transformPx": false,
+  "h5": {
+    "title": "蛋黄康复工作室",
+    "router": { "mode": "hash" }
+  },
+  "mp-weixin": {
+    "appid": "",
+    "setting": {
+      "urlCheck": false,
+      "es6": true,
+      "minified": true
+    },
+    "usingComponents": true
+  },
+  "uniStatistics": { "enable": false },
+  "vueVersion": "3"
+}
