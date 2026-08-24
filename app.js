@@ -123,6 +123,8 @@ function setPreviewMode(mode) {
   if (!shell) return;
   shell.classList.toggle('web-preview', nextMode === 'web');
   shell.classList.toggle('mini-preview', nextMode === 'mini');
+  document.body.classList.toggle('web-mode', nextMode === 'web');
+  document.body.classList.toggle('mini-mode', nextMode === 'mini');
   document.querySelectorAll('[data-preview-mode]').forEach((button) => {
     const active = button.dataset.previewMode === nextMode;
     button.classList.toggle('active', active);
