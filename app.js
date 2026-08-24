@@ -117,6 +117,20 @@ const escapeHtml = (value) => String(value).replace(/[&<>'"]/g, (char) => ({ '&'
 const roleLabel = (role) => ({ customer: '客户', therapist: '康复师', admin: '管理员' }[role] || '访客');
 const maskPhone = (phone) => phone ? `${phone.slice(0, 3)}****${phone.slice(-4)}` : '未绑定手机号';
 
+function setPreviewMode(mode) {
+  const nextMode = mode === 'mini' ? 'mini' : 'web';
+  const shell = el('#preview-shell');
+  if (!shell) return;
+  shell.classList.toggle('web-preview', nextMode === 'web');
+  shell.classList.toggle('mini-preview', nextMode === 'mini');
+  document.querySelectorAll('[data-preview-mode]').forEach((button) => {
+    const active = button.dataset.previewMode === nextMode;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+  localStorage.setItem('rehab-preview-mode', nextMode);
+}
+
 function persistAuth() { localStorage.setItem('rehab-auth', JSON.stringify(auth)); }
 function persistConsentLog() { localStorage.setItem('rehab-consent-log', JSON.stringify(consentLog)); }
 function recordConsent(scope, status, dataCategories, purpose) {
@@ -677,6 +691,11 @@ function showTherapistProfile(id) {
 }
 
 document.addEventListener('click', (event) => {
+  const previewButton = event.target.closest('[data-preview-mode]');
+  if (previewButton) {
+    setPreviewMode(previewButton.dataset.previewMode);
+    return;
+  }
   const target = event.target.closest('[data-action]'); if (!target) return;
   const { action } = target.dataset;
   if (action === 'home') showView('home');
@@ -831,4 +850,5 @@ document.addEventListener('submit', (event) => {
   if (form.dataset.editor === 'therapist') { const therapist = therapists.find((item) => item.id === form.dataset.id); const edited = Object.fromEntries(data.entries()); Object.assign(therapist, edited, { skills: edited.skills.split(/[，,]/).map((skill) => skill.trim()).filter(Boolean), certifications: edited.certifications.split(/[，,]/).map((item) => item.trim()).filter(Boolean) }); persistSettings(); renderTherapists(); renderBooking(); renderArrival(); renderAdmin(); toast('康复师资料已保存'); }
 });
 
+setPreviewMode(localStorage.getItem('rehab-preview-mode') || 'web');
 renderConfig(); renderAuth(); renderTherapists(); renderBooking(); renderArrival(); renderPlan(); renderAdmin();

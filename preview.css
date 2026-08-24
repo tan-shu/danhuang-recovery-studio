@@ -1,0 +1,59 @@
+:root { --demo-toolbar-height: 46px; }
+
+body { padding: 0 !important; }
+
+.preview-shell {
+  min-height: 100vh;
+  padding-top: var(--demo-toolbar-height);
+  background: #dcebed;
+  transition: background .25s ease;
+}
+
+.demo-toolbar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 100;
+  height: var(--demo-toolbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  color: #102c3a;
+  background: rgba(255,255,255,.97);
+  border-bottom: 1px solid #d6e5e8;
+  box-shadow: 0 5px 18px rgba(16,44,58,.05);
+  backdrop-filter: blur(16px);
+}
+
+.demo-notice { display: flex; align-items: center; gap: 9px; font-size: 11px; font-weight: 600; }
+.demo-notice i { width: 7px; height: 7px; border-radius: 50%; background: #14b9bd; box-shadow: 0 0 0 5px rgba(20,185,189,.12); }
+
+.view-switch { display: flex; gap: 2px; padding: 3px; background: #eaf1f2; border: 1px solid #dce9eb; border-radius: 999px; }
+.view-switch button { display: flex; align-items: center; gap: 6px; min-height: 28px; padding: 5px 11px; color: #6c8490; font-size: 11px; font-weight: 700; background: transparent; border-radius: 999px; }
+.view-switch button .icon { font-size: 13px; }
+.view-switch button.active { color: white; background: #008eaa; box-shadow: 0 3px 10px rgba(0,142,170,.18); }
+
+.preview-stage { min-height: calc(100vh - var(--demo-toolbar-height)); padding: 20px 0; transition: padding .25s ease, background .25s ease; }
+.preview-shell .topbar { top: var(--demo-toolbar-height); }
+
+.mini-preview { background: #cedcdf; }
+.mini-preview .preview-stage { padding: 28px 0 42px; }
+.mini-preview .app-shell {
+  width: min(calc(100% - 28px), 438px);
+  min-height: 880px;
+  border: 6px solid #6f8990;
+  border-radius: 28px;
+  box-shadow: 0 24px 64px rgba(16,44,58,.2);
+}
+.mini-preview .topbar { top: var(--demo-toolbar-height); border-radius: 20px 20px 0 0; }
+.mini-preview .bottom-nav { width: min(calc(100% - 48px), 418px); bottom: 20px; border-radius: 0 0 20px 20px; }
+
+@media (max-width: 560px) {
+  .demo-toolbar { padding: 0 10px; }
+  .demo-notice span { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .view-switch button { padding: 5px 9px; }
+  .preview-stage, .mini-preview .preview-stage { padding: 0; }
+  .mini-preview .app-shell { width: 100%; min-height: calc(100vh - var(--demo-toolbar-height)); border: 0; border-radius: 0; box-shadow: none; }
+  .preview-shell .topbar, .mini-preview .topbar { border-radius: 0; }
+  .mini-preview .bottom-nav { width: 100%; bottom: 0; border-radius: 0; }
+}

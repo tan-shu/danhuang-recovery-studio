@@ -15,9 +15,19 @@
     <link rel="stylesheet" href="./plan.css" />
     <link rel="stylesheet" href="./admin.css" />
     <link rel="stylesheet" href="./compliance.css" />
+    <link rel="stylesheet" href="./preview.css" />
   </head>
   <body>
-    <div class="app-shell">
+    <div id="preview-shell" class="preview-shell web-preview">
+      <div class="demo-toolbar">
+        <div class="demo-notice"><i></i><span>演示数据 · 蛋黄康复工作室</span></div>
+        <div class="view-switch" role="group" aria-label="预览模式">
+          <button class="active" type="button" data-preview-mode="web" aria-pressed="true"><i class="icon icon-monitor"></i> Web</button>
+          <button type="button" data-preview-mode="mini" aria-pressed="false"><i class="icon icon-smartphone"></i> 小程序预览</button>
+        </div>
+      </div>
+      <div class="preview-stage">
+        <div class="app-shell">
       <header class="topbar">
         <button class="brand" data-action="home" aria-label="返回首页">
           <span class="brand-mark"><i class="icon icon-activity"></i></span>
@@ -195,6 +205,8 @@
         <button class="nav-item" data-action="show-plan"><i class="icon icon-list-checks"></i><span>安排</span></button>
         <button class="nav-item" data-action="profile"><i class="icon icon-user-round"></i><span>我的</span></button>
       </nav>
+        </div>
+      </div>
     </div>
 
     <div id="modal-root"></div>
